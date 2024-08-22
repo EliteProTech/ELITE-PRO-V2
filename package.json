@@ -1,0 +1,16 @@
+{
+  "dependencies": {
+    "@whiskeysockets/baileys": "^6.7.6",
+    "express": "^4.19.2"
+  },
+  "name": "elite-pro-v2",
+  "version": "1.0.0",
+  "description": "A public Whatsapp bot with rich and multiple features Created by Chinwo Chinedu Emmanuel.",
+  "main": "index.js",
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
