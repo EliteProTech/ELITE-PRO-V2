@@ -336,11 +336,11 @@ XeonBotInc.ev.on("connection.update",async  (s) => {
 
             console.log(chalk.cyan(`< ================================================== >`))
 
-	        console.log(chalk.magenta(`\n${themeemoji} YT CHANNEL: Prexzyvilla`))
+	        console.log(chalk.magenta(`\n${themeemoji} YT CHANNEL: Elite-Pro-V2`))
 
-            console.log(chalk.magenta(`${themeemoji} GITHUB: Prexzybooster `))
+            console.log(chalk.magenta(`${themeemoji} GITHUB: Elite-MD `))
 
-            console.log(chalk.magenta(`${themeemoji} INSTAGRAM: @prexzy.ay `))
+            console.log(chalk.magenta(`${themeemoji} INSTAGRAM: @Chinwo Chinedu `))
 
             console.log(chalk.magenta(`${themeemoji} WA NUMBER: ${owner}`))
 

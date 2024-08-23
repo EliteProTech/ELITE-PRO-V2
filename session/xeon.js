@@ -1,3 +1,3 @@
 {
-	"name": "ELITEPRO Bot Multi Device "
+	"name"; "ELITEPRO Bot Multi Device "
 }

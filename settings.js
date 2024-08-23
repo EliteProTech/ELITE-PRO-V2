@@ -10,18 +10,18 @@ global.location = "Nigeria, Port Harcourt"
 
 global.ownernumber = '2348109263390'  //creator number
 global.ownername = 'Elite-Pro-V2' //owner name
-global.botname = 'PREXZY ᵇᵘᵍ ᵇᵒᵗ' //name of the bot
+global.botname = 'ELITE-PRO-V2' //name of the bot
 
 //sticker details
 global.packname = 'Sticker By'
-global.author = 'ELITEPRO🚫\n\nContact: +2348109263390'
+global.author = 'ELITE-PRO🚫\n\nContact: +2348109263390'
 
 //console view/theme
 global.themeemoji = '🪀'
 global.wm = "ELITEPRO."
 
 //theme link
-global.link = 'https://whatsapp.com/channel/0029VaaUfPO8qIzztuf42D04'
+global.link = 'https://whatsapp.com/channel/0029VaXaqHII1rcmdDBBsd3g'
 
 //custom prefix
 global.prefa = ['','!','.','#','&']
