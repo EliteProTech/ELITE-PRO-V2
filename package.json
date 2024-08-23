@@ -14,7 +14,7 @@
     "scripts": {
         "start": "node index.js"
     },
-    "author": "Prexzyvilla",
+    "author": "ELITE-PRO",
     "license": "MIT",
     "dependencies": {
         "@whiskeysockets/baileys": "^6.7.5",
