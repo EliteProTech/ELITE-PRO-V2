@@ -2,7 +2,7 @@
 </p>
 <p align="center">
   <a href="https://chat.whatsapp.com/GRIeuAnUgk54u2IL5ujUxJ">
-    <img alt=Support weight="10" src="https://graph.org/file/778da0a03e971ae4b41e5.jpg"> 
+    <img alt=Support weight="10" src="https://telegra.ph/file/3e81c19e2e4424a41eca2.jpg"> 
     </p>
 <h1 align="center">    ELITE-PRO-V2
 </h1>

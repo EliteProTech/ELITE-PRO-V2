@@ -1222,7 +1222,7 @@ ${cpus.map((cpu, i) => `${i + 1}. ${cpu.model.trim()} (${cpu.speed} MHZ)\n${Obje
                             showAdAttribution: true,
                             title: `${botname}`,
                             body: `${latensi.toFixed(4)} Second`,
-                            thumbnailUrl: 'https://telegra.ph/file/3a21bf26bedef7966fd74.jpg',
+                            thumbnailUrl: 'https://telegra.ph/file/3e81c19e2e4424a41eca2.jpg',
                             sourceUrl: global.link,
                             mediaType: 1,
                             renderLargerThumbnail: true
@@ -1264,7 +1264,7 @@ ${cpus.map((cpu, i) => `${i + 1}. ${cpu.model.trim()} (${cpu.speed} MHZ)\n${Obje
                             showAdAttribution: true,
                             title: `${botname}`,
                             body: `FORGET DONATE`,
-                            thumbnailUrl: 'https://telegra.ph/file/3a21bf26bedef7966fd74.jpg',
+                            thumbnailUrl: 'https://telegra.ph/file/3e81c19e2e4424a41eca2.jpg',
                             sourceUrl: global.link,
                             mediaType: 1,
                             renderLargerThumbnail: true
@@ -1284,7 +1284,7 @@ ${cpus.map((cpu, i) => `${i + 1}. ${cpu.model.trim()} (${cpu.speed} MHZ)\n${Obje
                             showAdAttribution: true,
                             title: `${botname}`,
                             body: `SCRIPT OF ${botname} is on YouTube @prexzyvilla`,
-                            thumbnailUrl: 'https://telegra.ph/file/3a21bf26bedef7966fd74.jpg',
+                            thumbnailUrl: 'https://telegra.ph/file/3e81c19e2e4424a41eca2.jpg',
                             sourceUrl: global.link,
                             mediaType: 1,
                             renderLargerThumbnail: true
@@ -2273,7 +2273,7 @@ break
             case 'alive':
             case '?':
             case 'allmenu':
-                let xeonmenuoh = `╭═══ PREXZY-𝙱𝚄𝙶-𝙱𝙾𝚃 ═══⊷
+                let xeonmenuoh = `╭═══ ELITE-PRO-V2 ═══⊷
 ┃❃╭──────────────
 ┃❃│ Prefix : [ ]
 ┃❃│ User :  ${pushname}
@@ -2401,7 +2401,7 @@ break
 ┃ 🩵 sᴏᴜɴᴅ1 - sᴏᴜɴᴅ161
 ╰═════════════════⊷
 
-> Precious Ayomide ©`
+> Chinwo Chinedu ©`
 if (typemenu === 'v1') {
                     XeonBotInc.sendMessage(m.chat, {
                         text: xeonmenuoh,
@@ -2409,7 +2409,7 @@ if (typemenu === 'v1') {
                             externalAdReply: {
                                 title: botname,
                                 body: ownername,
-                                thumbnailUrl: 'https://telegra.ph/file/3a21bf26bedef7966fd74.jpg',
+                                thumbnailUrl: 'https://telegra.ph/file/3e81c19e2e4424a41eca2.jpg',
                                 sourceUrl: link,
                                 mediaType: 1,
                                 renderLargerThumbnail: true
@@ -2427,7 +2427,7 @@ if (typemenu === 'v1') {
       externalAdReply: {
       title: botname,
       body: ownername,
-      thumbnailUrl: 'https://telegra.ph/file/3a21bf26bedef7966fd74.jpg',
+      thumbnailUrl: 'https://telegra.ph/file/3e81c19e2e4424a41eca2.jpg',
       sourceUrl: ``,
       mediaType: 1,
       renderLargerThumbnail: true
