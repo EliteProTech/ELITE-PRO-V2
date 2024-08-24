@@ -2273,15 +2273,14 @@ break
             case 'alive':
             case '?':
             case 'allmenu':
-            case 'hello':
                 let xeonmenuoh = `╭═══ ELITE-PRO-V2 ═══⊷
 ┃❃╭──────────────
-┃❃│ Prefix : [ ]
+┃❃│ Prefix : [Multi-Prefix]
 ┃❃│ User :  ${pushname}
 ┃❃│ Time : ${xeonytimewisher}
-┃❃│ Day : Look at the watch
-┃❃│ Date : Calendar is here
-┃❃│ Version : 1.0
+┃❃│ Theme : Elite-Pro-V2
+┃❃│ Mode : Public
+┃❃│ Version : 2.0
 ┃❃│ Plugins : 250
 ┃❃│ Ram : 64 GB
 ┃❃│ Alive : ${runtime(process.uptime())}
