@@ -1204,7 +1204,7 @@ senddocu(buffer)
                 respon = `
 Response Speed ${latensi.toFixed(4)} _Second_ \n ${oldd - neww} _miliseconds_\n\nRuntime : ${runtime(process.uptime())}
 
-💻 Info Server
+💻 ELITE-PRO-V2 Info Server
 RAM: ${formatp(os.totalmem() - os.freemem())} / ${formatp(os.totalmem())}
 
 _NodeJS Memory Usaage_
@@ -1278,7 +1278,7 @@ ${cpus.map((cpu, i) => `${i + 1}. ${cpu.model.trim()} (${cpu.speed} MHZ)\n${Obje
             case 'script':
             case 'scriptbot':
                 XeonBotInc.sendMessage(m.chat, {
-                    text: `🔰 I am ᴇʟɪᴛᴇ-ᴘʀᴏ 🔰
+                    text: `🔰 I'm ᴇʟɪᴛᴇ-ᴘʀᴏ 🔰
   ❲❒❳ Description: A Public WhatsApp bot with rich features, Created By Chinwo Chinedu.
 ----------------------------------------------
 Perfix: [ Multi-Prefix ]

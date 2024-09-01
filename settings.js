@@ -1,3 +1,4 @@
+//Change the ownername, ownernumber and botname to yours. Thanks
 const fs = require('fs')
 const chalk = require('chalk')
 
