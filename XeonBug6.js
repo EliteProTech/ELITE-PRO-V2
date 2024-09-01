@@ -1111,7 +1111,8 @@ senddocu(buffer)
                     quoted: m
                 })
                 break
-            case
+            case "tagadmin"
+                
                 break
             case 'totag':
                 if (!m.isGroup) return replygcxeon(mess.group)
@@ -1258,7 +1259,7 @@ ${cpus.map((cpu, i) => `${i + 1}. ${cpu.model.trim()} (${cpu.speed} MHZ)\n${Obje
             }
             break
             case 'runtime':
-                let runtimetext = `Bots Have Been Running For ${runtime(process.uptime())}`
+                let runtimetext = `ELITE-PRO-V2 Have Been Running For ${runtime(process.uptime())}`
                 XeonBotInc.sendMessage(m.chat, {
                     text: runtimetext,
                     contextInfo: {
@@ -1280,7 +1281,13 @@ ${cpus.map((cpu, i) => `${i + 1}. ${cpu.model.trim()} (${cpu.speed} MHZ)\n${Obje
             case 'script':
             case 'scriptbot':
                 XeonBotInc.sendMessage(m.chat, {
-                    text: `Helllo world`,
+                    text: `🔰 I am ᴇʟɪᴛᴇ-ᴘʀᴏ 🔰
+  ❲❒❳ Description: A Public WhatsApp bot with rich features, Created By Chinwo Chinedu.
+----------------------------------------------
+Perfix: [ Multi-Prefix ]
+----------------------------------------------
+Contact: https://wa.link/d2b0ks
+ᴘᴏᴡᴇʀᴇᴅ ʙʏ ᴇʟɪᴛᴇ-ᴘʀᴏ`,
                     contextInfo: {
                         externalAdReply: {
                             showAdAttribution: true,
@@ -1296,11 +1303,11 @@ ${cpus.map((cpu, i) => `${i + 1}. ${cpu.model.trim()} (${cpu.speed} MHZ)\n${Obje
                     quoted: m
                 })
                 break
-            case 'donate':
+            case 'who is elite-pro-v2':
             case 'donasi':
-                let textnate = `Hello Brother ${pushname}\n\nNo matter how much you donate is very valuable for us`
+                let textnate = `Hey ${pushname}\n\ni'm ELITE-PRO-V2 a Public WhatsApp bot with rich features, Created By Chinwo Chinedu.`
                 XeonBotInc.sendMessage(m.chat, {
-                    text: 'Opay: 9159895444 ABIGAIL \n\n' + textnate
+                    text: 'Whatsapp Number: 2348109263390 \n\n' + textnate
                 }, {
                     quoted: m
                 })
@@ -1310,7 +1317,7 @@ const repf = await XeonBotInc.sendMessage(from, {
 contacts: { 
 displayName: `${list.length} Contact`, 
 contacts: list }, mentions: [sender] }, { quoted: m })
-XeonBotInc.sendMessage(from, { text : `Hi @${sender.split("@")[0]}, Here is my handsome owner😇`, mentions: [sender]}, { quoted: repf })
+XeonBotInc.sendMessage(from, { text : `Hi @${sender.split("@")[0]}, He is the current user of ELITE-PRO-V2`, mentions: [sender]}, { quoted: repf })
 }
 break
             case 'sticker':
