@@ -1111,9 +1111,6 @@ senddocu(buffer)
                     quoted: m
                 })
                 break
-            case "tagadmin"
-                
-                break
             case 'totag':
                 if (!m.isGroup) return replygcxeon(mess.group)
                 if (!isBotAdmins) return replygcxeon(mess.botAdmin)
