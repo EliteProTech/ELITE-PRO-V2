@@ -21,18 +21,19 @@
 
 ## DEPLOYMENT METHODS
 ---
-   ***Fork Repo***
- ***[FORK](https://github.com/elite-md/Elite-Pro-V2/fork)***
- 
-    FORK MY REPO TO GAIN FULL ACCESS
----
-***Paring Code***
-***[PARING CODE](https://elite-pro-v1.onrender.com)***
-    
-    Paste your creds.json in authFile folder.
----
 
-<a href='https://dashboard.render.com/web/new' target="_blank"><img alt='DEPLOY' src='https://img.shields.io/badge/-Deploy on render-black?style=for-the-badge&logo=render&logoColor=white'/>
+First star my repository then click on [FORK](https://github.com/elite-md/Elite-Pro-V2/fork)
+When done with that, click on database folder 📂 open owner.json and replace the number with yours also do the same for the premium.json.
+
+
+
+## Next step open settings.js
+Change 
+global.ownername,
+global.botname,
+global.ownernumber
+To yours then click on download zip.
+Paste it on panel then Enjoy...
 
 ---
 
