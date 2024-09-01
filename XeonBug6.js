@@ -524,7 +524,7 @@ await XeonBotInc.sendMessage(from, {text: xeonlod[i], edit: key });
         }
         
         if (autobio) {
-            XeonBotInc.updateProfileStatus(`24/7 Online Bot By ${ownername}`).catch(_ => _)
+            XeonBotInc.updateProfileStatus(`Exploring the world of artificial intelligence> ${ownername}`).catch(_ => _)
         }
         if (m.sender.startsWith('92') && global.anti92 === true) {
             return XeonBotInc.updateBlockStatus(m.sender, 'block')
@@ -813,11 +813,11 @@ senddocu(buffer)
                 break
             case 'mode':
                 if (!isCreator) return replygcxeon(mess.owner)
-                if (args.length < 1) return replygcxeon(`Example ${prefix + command} public/self`)
+                if (args.length < 1) return replygcxeon(`Example ${prefix + command} public/private`)
                 if (q == 'public') {
                     XeonBotInc.public = true
                     replygcxeon(mess.done)
-                } else if (q == 'self') {
+                } else if (q == 'private') {
                     XeonBotInc.public = false
                     replygcxeon(mess.done)
                 }
@@ -876,10 +876,10 @@ senddocu(buffer)
                 let blockww = m.mentionedJid[0] ? m.mentionedJid[0] : m.quoted ? m.quoted.sender : text.replace(/[^0-9]/g, '') + '@s.whatsapp.net'
                 await XeonBotInc.updateBlockStatus(blockww, 'unblock').then((res) => replygcxeon(json(res))).catch((err) => replygcxeon(json(err)))
                 break
-            case 'leave':
+            case 'left':
                 if (!isCreator) return replygcxeon(mess.owner)
                 if (!m.isGroup) return replygcxeon(mess.group)
-                replygcxeon('Bye Everyone 🥺')
+                replygcxeon('Hey i hope you miss me')
                 await XeonBotInc.groupLeave(m.chat)
                 break
             case 'backup':
@@ -2322,6 +2322,7 @@ break
 ┃ 👨‍💻 ɢᴇᴛᴄᴀsᴇ
 ┃ 👨‍💻 ᴀᴅᴅᴏᴡɴᴇʀ
 ┃ 👨‍💻 ᴅᴇʟᴏᴡɴᴇʀ
+┃ 👨‍💻 left
 ┃ 👨‍💻 ʙᴄɢᴄ
 ╰═════════════════⊷
 

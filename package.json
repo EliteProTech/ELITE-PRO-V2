@@ -1,12 +1,11 @@
 {
-    "name": "ELITE-PRO-V2",
+    "name": "elite-pro-v2",
     "version": "6.0.0",
     "description": "WhatsApp War Bot Using Nodejs",
     "main": "index.js",
     "type": "commonjs",
     "directories": {
         "lib": "lib",
-        "database": "database",
         "database": "database",
         "session": "session",
         "media": "media"
