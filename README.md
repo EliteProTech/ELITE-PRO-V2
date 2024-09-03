@@ -10,7 +10,7 @@
     </p>
     </p>
 
-   [![Typing SVG](https://readme-typing-svg.herokuapp.com?font=Rockstar-ExtraBold&color=BBDEFB&lines=WELCOME+TO+ELITE+PRO+V1+MADE+BY;CHINWO+CHINEDU+EMMANUEL;THANKS+FOR+VISITING+MY+REPO)](https://git.io/typing-svg)
+   [![Typing SVG](https://readme-typing-svg.herokuapp.com?font=Rockstar-ExtraBold&color=BBDEFB&lines=WELCOME+TO+ELITE+PRO+V2+MADE+BY;CHINWO+CHINEDU+EMMANUEL;THANKS+FOR+VISITING+MY+REPO)](https://git.io/typing-svg)
    
 
 <a aria-label="Chat me" href="https://t.me/Chinedu_md" target="_blank">
@@ -38,7 +38,7 @@ Paste it on panel then Enjoy...
 ---
 
   ## DESCRIPTION
-I'm Elite-Pro a public WhatsApp bot with rich features Created by Chinwo Chinedu Emmanuel and Hacxk. Feel free to deploy my bot in any of the deployment site. 😜
+I'm Elite-Pro a public WhatsApp bot with rich features Created by Chinwo Chinedu Emmanuel. Feel free to deploy my bot in any of the deployment site. 😜
 
  --- 
 - Star ⭐ repo if you like this bot.
