@@ -4,7 +4,7 @@ on:
 
   push:
 
-    branches: ['master']
+    branches: ['main']
 
 jobs:
 
@@ -28,8 +28,8 @@ jobs:
 
       - name: Build the Docker image
 
-        run: docker build . --file Dockerfile --tag ${{ secrets.DOCKER_USERNAME }}/cheemsbot11oh
+        run: docker build . --file Dockerfile --tag ${{ secrets.DOCKER_USERNAME }}/elite-pro-v2oh
 
       - name: Docker Push
 
-        run: docker push ${{ secrets.DOCKER_USERNAME }}/cheemsbot11oh
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/elite-pro-v2oh
