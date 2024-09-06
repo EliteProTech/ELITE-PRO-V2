@@ -26,23 +26,25 @@
 
 
 ## Next step open settings.js
-Change 
+```Change 
 global.ownername,
 global.botname,
 global.ownernumber
 To yours then click on download zip.
 Upload the zip file on panel...
-
+```
 ---
 
 ## Clone Repo & Installation dependencies For Termux User
+```
 bash
 git clone https://github.com/Elite-MD/Elite-Pro-V2.git
 cd Elite-Pro-V2
 
 npm start
-
+```
 ## For Termux/Ssh/Ubuntu
+```
 bash
 apt update
 apt upgrade
@@ -58,9 +60,9 @@ git clone https://github.com/elite-md/Elite-Pro-V2
 cd Elite-Pro-V2
 yarn install
 npm start
-
+```
 ## For VPS
-
+```
 bash
 apt install nodejs 
 apt install git 
@@ -71,11 +73,12 @@ apt install bash
 git clone https://github.com/elite-md/Elite-Pro-V2
 cd Elite-Pro-V2
 npm start
-
+```
 ## For 24/7 Activation (Termux)
+```
 bash
 npm i -g pm2 && pm2 start index.js && pm2 save && pm2 logs
-
+```
 ---
 
   ## DESCRIPTION
