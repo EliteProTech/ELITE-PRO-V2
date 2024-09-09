@@ -1,49 +1,44 @@
-</p>
-</p>
 <p align="center">
   <a href="https://chat.whatsapp.com/GRIeuAnUgk54u2IL5ujUxJ">
     <img alt=Support weight="10" src="https://telegra.ph/file/a8265ce43fbfcc43bffeb.jpg"> 
     </p>
-<h1 align="center">    ELITE-PRO-V2
-</h1>
+<h1 align="center">ELITE-PRO-V2</h1>
 <p align="center"> 
     </p>
-    </p>
-
-   [![Typing SVG](https://readme-typing-svg.herokuapp.com?font=Rockstar-ExtraBold&color=BBDEFB&lines=WELCOME+TO+ELITE+PRO+V2+MADE+BY;CHINWO+CHINEDU+EMMANUEL;THANKS+FOR+VISITING+MY+REPO)](https://git.io/typing-svg)
-   
-
-<a aria-label="Chat me" href="https://t.me/Chinedu_md" target="_blank">
-    <img alt="telegram" src="https://img.shields.io/badge/Chat Me-25D366?style=for-the-badge&logo=telegram&logoColor=white" />
+<p align="center">
+  <a aria-label="Join our chats" href="https://chat.whatsapp.com/GRIeuAnUgk54u2IL5ujUxJ" target="_blank">
+    <img alt="whatsapp" src="https://img.shields.io/badge/Join Group chat-25D366?style=for-the-badge&logo=whatsapp&logoColor=white" />
+    <a align="center">
+  <a aria-label="Follow Channel" href="https://whatsapp.com/channel/0029VaXaqHII1rcmdDBBsd3g" target="_blank">
+    <img alt="whatsapp" src="https://img.shields.io/badge/Follow Channel-25D366?style=for-the-badge&logo=whatsapp&logoColor=white" />
+</a>
+<a aria-label="Chat me" href="https://t.me/elitepro_md" target="_blank">
+    <img alt="telegram" src="https://img.shields.io/badge/Telegram Group-24A1DE?style=for-the-badge&logo=telegram&logoColor=white" />
   </a>
-
----
+</p>
+      
+   [![Typing SVG](https://readme-typing-svg.herokuapp.com?font=Rockstar-ExtraBold&color=BBDEFB&lines=WELCOME+TO+ELITE+PRO+V2+MADE+BY;CHINWO+CHINEDU+EMMANUEL;THANKS+FOR+VISITING+MY+REPO)](https://git.io/typing-svg)  
+   
+ ---
 
 ## DEPLOYMENT METHODS
+
+- Click on **[FORK](https://github.com/elite-md/Elite-Pro-V2/fork)**
+- Edit settings.js to your preference 
+- Download zip file 🗃️
+
 ---
 
-- FIRST STAR MY REPOSITORY THEN CLICK ON FORK [FORK](https://github.com/elite-md/Elite-Pro-V2/fork)
+## FOR PANEL DEPLOYMENT
 
+- Click on **[BOT-HOSTING.NET](https://bot-hosting.net/)**
+- Create a server
+- Upload zip file 🗃️ 
+- Start server
 
-## Next step open settings.js
-```Change 
-global.ownername,
-global.botname,
-global.ownernumber
-To yours then click on download zip.
-Upload the zip file on panel...
-```
 ---
 
-## Clone Repo & Installation dependencies For Termux User
-```
-bash
-git clone https://github.com/Elite-MD/Elite-Pro-V2.git
-cd Elite-Pro-V2
-
-npm start
-```
-## For Termux/Ssh/Ubuntu
+## FOR TERMUX/SSH/UBUNTU
 ```
 bash
 apt update
@@ -60,24 +55,6 @@ git clone https://github.com/elite-md/Elite-Pro-V2
 cd Elite-Pro-V2
 yarn install
 npm start
-```
-## For VPS
-```
-bash
-apt install nodejs 
-apt install git 
-apt apt install ffmpeg 
-apt apt install libwebp 
-apt apt install imagrmagick
-apt install bash
-git clone https://github.com/elite-md/Elite-Pro-V2
-cd Elite-Pro-V2
-npm start
-```
-## For 24/7 Activation (Termux)
-```
-bash
-npm i -g pm2 && pm2 start index.js && pm2 save && pm2 logs
 ```
 ---
 
