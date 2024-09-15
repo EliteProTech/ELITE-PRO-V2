@@ -2562,7 +2562,7 @@ if (!XeonTheCreator) return XeonStickOwner()
                     quoted: m
                 })
             break
-            case 'tag':
+            case 'totag':
                 if (!m.isGroup) return XeonStickGroup()
                 if (!isBotAdmins) return XeonStickBotAdmin()
                 if (!isAdmins) return replygcxeon(mess.admin)

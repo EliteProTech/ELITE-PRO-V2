@@ -22,7 +22,7 @@ global.botscript = 'https://github.com/Elite-MD/ELITE-PRO-V2' //script link
 global.packname = "Sticker By"
 global.author = "ELITE-PRO-V2"
 global.creator = "2348109263390@s.whatsapp.net"
-global.xprefix = '!'
+global.xprefix = '.'
 global.premium = ["2348109263390"] // Premium User
 global.hituet = 0
 
