@@ -40,21 +40,36 @@
 
 ## FOR TERMUX/SSH/UBUNTU
 ```
-bash
-apt update
-apt upgrade
+Before inputting these commands in termux... You have to extract the bot file in your internal storage. (Downloads folder)
+
+apt update && apt upgrade
 pkg update && pkg upgrade
 pkg install bash
-pkg install libwebp
 pkg install git -y
 pkg install nodejs -y 
 pkg install ffmpeg -y 
 pkg install wget
 pkg install imagemagick -y
-git clone https://github.com/elite-md/Elite-Pro-V2
-cd Elite-Pro-V2
+pkg install yarn
+termux-setup-storage
+cd /storage/emulated/0/Download/Elite-Pro-V2-main
 yarn install
 npm start
+```
+---
+
+## FOR STARTING TERMUX AGAIN
+```
+cd /storage/emulated/0/Download/Elite-Pro-V2-main
+npm start
+```
+---
+
+## FOR 24/7 ACTIVATION TERMUX/SSH/UBUNTU
+```
+bash
+npm i -g pm2 && pm2 start index.js && pm2 save && pm2 logs
+Paste this after the installation
 ```
 ---
 
