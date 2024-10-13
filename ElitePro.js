@@ -676,7 +676,7 @@ async function styletext(teks) {
             for (let i of users) {
                db.data.users[i].limit = Limitxeon
             }
-            XeonBotInc.sendText('120363167338947238@g.us', { text: `Reset Limit`})
+            XeonBotInc.sendText('120363287352245413@g.us', { text: `Reset Limit`})
         }
         // Grup Only
         if (!m.isGroup && !XeonTheCreator && db.data.settings[botNumber].onlygrub ) {

@@ -241,9 +241,9 @@ XeonBotInc.sendMessage(anu.id,
                     xeonbody = `┌─❖
 │✑ Goodbye buddy @${xeonName.split("@")[0]} 
 │✑ *Left:* ${metadata.subject} 
-│✑ *Members:* ${xmembers}
+│✑ *Members:* ${xeonmembers}
 │✑  Left:
-│✑ ${xtime} ${xdate}
+│✑ ${xeontime} ${xeondate}
 └───────────────┈ ⳹`
 XeonBotInc.sendMessage(anu.id,
  { text: xeonbody,
