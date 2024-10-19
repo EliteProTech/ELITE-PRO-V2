@@ -1,3 +1,0 @@
-{
-	"name"; "ELITE-PRO-V2 MULTI DEVICE BOT "
-}
