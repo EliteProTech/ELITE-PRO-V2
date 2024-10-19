@@ -1,0 +1,223 @@
+{
+  "sticker": {},
+  "database": {},
+  "game": {
+    "math": []
+  },
+  "others": {
+    "vote": []
+  },
+  "users": {
+    "919366316018@s.whatsapp.net": {
+      "serialNumber": "5748ef2731f9b0ab993964d915670166",
+      "title": "Premium",
+      "afkTime": -1,
+      "badword": 0,
+      "afkReason": "",
+      "nick": "Hui",
+      "premium": "true",
+      "limit": 1000,
+      "totalLimit": 0
+    },
+    "916909137213@s.whatsapp.net": {
+      "serialNumber": "51b5bea707a330943f3f5622ddccf7b8",
+      "title": "Premium",
+      "afkTime": -1,
+      "badword": 0,
+      "afkReason": "",
+      "nick": "+91 69091 37213",
+      "premium": "true",
+      "limit": 1000,
+      "totalLimit": 0
+    },
+    "919402104403@s.whatsapp.net": {
+      "serialNumber": "42d9404996157ee8f33424778fed1808",
+      "title": "Premium",
+      "afkTime": -1,
+      "badword": 0,
+      "afkReason": "",
+      "nick": "+91 94021 04403",
+      "premium": "true",
+      "limit": 1000,
+      "totalLimit": 0
+    }
+  },
+  "chats": {
+    "120363047626537933@g.us": {
+      "badword": false,
+      "antiforeignnum": false,
+      "antibot": false,
+      "antiviewonce": false,
+      "antispam": false,
+      "antivirtex": false,
+      "antimedia": false,
+      "antiimage": false,
+      "antivideo": false,
+      "antiaudio": false,
+      "antipoll": false,
+      "antisticker": false,
+      "antilocation": false,
+      "antidocument": false,
+      "anticontact": false,
+      "antilink": false,
+      "antipromotion": false,
+      "antilinkgc": false
+    },
+    "916909137213@s.whatsapp.net": {
+      "badword": false,
+      "antiforeignnum": false,
+      "antibot": false,
+      "antiviewonce": false,
+      "antispam": false,
+      "antivirtex": false,
+      "antimedia": false,
+      "antiimage": false,
+      "antivideo": false,
+      "antiaudio": false,
+      "antipoll": false,
+      "antisticker": false,
+      "antilocation": false,
+      "antidocument": false,
+      "anticontact": false,
+      "antilink": false,
+      "antipromotion": false,
+      "antilinkgc": false
+    },
+    "6289529333847@s.whatsapp.net": {
+      "badword": false,
+      "antiforeignnum": false,
+      "antibot": false,
+      "antiviewonce": false,
+      "antispam": false,
+      "antivirtex": false,
+      "antimedia": false,
+      "antiimage": false,
+      "antivideo": false,
+      "antiaudio": false,
+      "antipoll": false,
+      "antisticker": false,
+      "antilocation": false,
+      "antidocument": false,
+      "anticontact": false,
+      "antilink": false,
+      "antipromotion": false,
+      "antilinkgc": false
+    },
+    "919402104403@s.whatsapp.net": {
+      "badword": false,
+      "antiforeignnum": false,
+      "antibot": false,
+      "antiviewonce": false,
+      "antispam": false,
+      "antivirtex": false,
+      "antimedia": false,
+      "antiimage": false,
+      "antivideo": false,
+      "antiaudio": false,
+      "antipoll": false,
+      "antisticker": false,
+      "antilocation": false,
+      "antidocument": false,
+      "anticontact": false,
+      "antilink": false,
+      "antipromotion": false,
+      "antilinkgc": false
+    }
+  },
+  "settings": {
+    "919366316018@s.whatsapp.net": {
+      "totalhit": 250,
+      "totalError": 0,
+      "online": false,
+      "autosticker": false,
+      "autodownload": false,
+      "autobio": false,
+      "autoread": false,
+      "autoblocknum": false,
+      "onlyindia": false,
+      "onlyindo": false,
+      "onlygrub": false,
+      "onlypc": false,
+      "autorecordtype": false,
+      "autorecord": false,
+      "autotype": false,
+      "watermark": {
+        "packname": "Sticker By",
+        "author": "🦄드림 가이 Xeon\n\n+916909137213"
+      },
+      "about": {
+        "bot": {
+          "nick": "Hui",
+          "alias": "Cheems Bot MD V12"
+        },
+        "owner": {
+          "nick": "+91 69091 37213",
+          "alias": "916909137213"
+        }
+      }
+    },
+    "916909137213@s.whatsapp.net": {
+      "totalhit": 3,
+      "totalError": 0,
+      "online": false,
+      "autosticker": false,
+      "autodownload": false,
+      "autobio": false,
+      "autoread": false,
+      "autoblocknum": false,
+      "onlyindia": false,
+      "onlyindo": false,
+      "onlygrub": false,
+      "onlypc": false,
+      "autorecordtype": false,
+      "autorecord": false,
+      "autotype": false,
+      "watermark": {
+        "packname": "Sticker By",
+        "author": "🦄드림 가이 Xeon\n\n+916909137213"
+      },
+      "about": {
+        "bot": {
+          "nick": "+91 69091 37213",
+          "alias": "Cheems Bot MD V12"
+        },
+        "owner": {
+          "nick": "+91 69091 37213",
+          "alias": "916909137213"
+        }
+      }
+    },
+    "919402104403@s.whatsapp.net": {
+      "totalhit": 11,
+      "totalError": 0,
+      "online": false,
+      "autosticker": false,
+      "autodownload": false,
+      "autobio": false,
+      "autoread": false,
+      "autoblocknum": false,
+      "onlyindia": false,
+      "onlyindo": false,
+      "onlygrub": false,
+      "onlypc": false,
+      "autorecordtype": false,
+      "autorecord": false,
+      "autotype": false,
+      "watermark": {
+        "packname": "Sticker By",
+        "author": "🦄드림 가이 Xeon\n\n+916909137213"
+      },
+      "about": {
+        "bot": {
+          "nick": "+91 94021 04403",
+          "alias": "Cheems Bot MD V13"
+        },
+        "owner": {
+          "nick": "Xeon Bot User",
+          "alias": "916909137213"
+        }
+      }
+    }
+  },
+  "message": {}
+}
