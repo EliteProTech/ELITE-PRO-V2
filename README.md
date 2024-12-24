@@ -24,17 +24,20 @@
 ## DEPLOYMENT METHODS
 
 - Click on **[FORK](https://github.com/elite-md/Elite-Pro-V2/fork)**
+- Click here to get **[SESSION_ID](https://elitepro-paring-website.onrender.com)**
+- Uploading session_id (Creds.json) in session folder.
 - Edit settings.js to your preference 
-- Download zip file 🗃️
 
 ---
 
 ## FOR PANEL DEPLOYMENT
 
+- Download zip file🗃
 - Click on **[BOT-HOSTING.NET](https://bot-hosting.net/)**
 - Create a server
 - Upload zip file 🗃️ 
 - Start server
+- Click here to deploy on **[Render](https://render.com)**
 
 ---
 
@@ -71,6 +74,18 @@ bash
 npm i -g pm2 && pm2 start index.js && pm2 save && pm2 logs
 Paste this after the installation
 ```
+---
+
+<p align="Left">
+    <a align="center">
+  <a aria-label="WEBSITE" href="https://elite-production.vercel.app" target="_blank">
+    <img alt="ELITEPRO-WEB" src="https://img.shields.io/badge/ELITEPRO WEB-25D366?style=for-the-badge&logo=online&logoColor=white" />
+</a>
+<a aria-label="NEW REPO" href="https://github.com/elite-md/ELITEPRO" target="_blank">
+    <img alt="OTHER REPO" src="https://img.shields.io/badge/NEW REPO-0E1241?style=for-the-badge&logo=github&logoColor=white" />
+  </a>
+</p>
+
 ---
 
   ## DESCRIPTION
