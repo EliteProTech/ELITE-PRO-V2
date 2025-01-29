@@ -36,7 +36,7 @@
 - Click on **[BOT-HOSTING.NET](https://bot-hosting.net/)**
 - Create a server
 - Upload zip file 🗃️ 
-- Start server
+- Start server 👍
 - Click here to deploy on **[Render](https://render.com)**
 
 ---
@@ -55,7 +55,7 @@ pkg install wget
 pkg install imagemagick -y
 pkg install yarn
 termux-setup-storage
-cd /storage/emulated/0/Download/Elite-Pro-V2-main
+cd /storage/emulated/0/Download/Elite-Pro-V2-master
 yarn install
 npm start
 ```
@@ -63,7 +63,7 @@ npm start
 
 ## FOR STARTING TERMUX AGAIN
 ```
-cd /storage/emulated/0/Download/Elite-Pro-V2-main
+cd /storage/emulated/0/Download/Elite-Pro-V2-master
 npm start
 ```
 ---
