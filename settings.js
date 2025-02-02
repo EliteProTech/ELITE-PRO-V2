@@ -16,6 +16,7 @@ global.ownername = 'ELITEPRO' //ur owner name
 global.themeemoji = '👨‍💻'
 global.wm = "EliteProEmpire"
 global.botscript = 'https://github.com/Elite-MD/Elite-Pro-V2' //script link
+global.elitepropp = 'https://files.catbox.moe/syvykg.jpg' //ElitePro thumbnail 
 
 global.packname = "Sticker By"
 global.author = "ELITE-PRO-V2\n\n+2348109263390"
