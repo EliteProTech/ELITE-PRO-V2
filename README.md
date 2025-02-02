@@ -24,7 +24,7 @@
 ## DEPLOYMENT METHODS
 
 - Click on **[FORK](https://github.com/elite-md/Elite-Pro-V2/fork)**
-- Click here to get **[SESSION_ID](https://elitepro-paring-website.onrender.com)**
+- Click here to get **[SESSION_ID](https://elitepro-pairing-code.onrender.com)**
 - Uploading session_id (Creds.json) in session folder.
 - Edit settings.js to your preference 
 

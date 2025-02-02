@@ -185380,6 +185380,7 @@ ppxeon = await getBuffer(ppuser)
 EliteProEmpire.sendMessage(from, { image: ppxeon, caption: profile, mentions: [eli] }, { quoted: m })
 
 //Screenshot of Website
+break
 case 'ss': case 'ssweb': {
   if (!args[0]) return m.reply(`Please provide a link\n\n Example: ${prefix + command}.`);
   await EliteProEmpire.sendMessage(m?.chat, { react: { text: `📸`, key: m?.key } });
