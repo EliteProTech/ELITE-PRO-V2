@@ -24,7 +24,7 @@
 ## DEPLOYMENT METHODS
 
 - Click on **[FORK](https://github.com/elite-md/Elite-Pro-V2/fork)**
-- Click here to get **[SESSION_ID](https://elitepro-pairing-code.onrender.com)**
+- Click here to get **[SESSION_ID](https://elitepro-pairing-code.onrender.com/)**
 - Uploading session_id (Creds.json) in session folder.
 - Edit settings.js to your preference 
 
@@ -32,12 +32,17 @@
 
 ## FOR PANEL DEPLOYMENT
 
-- Download zip file🗃
-- Click on **[BOT-HOSTING.NET](https://bot-hosting.net/)**
+- Click on **[download](https://github.com/elite-md/Elite-Pro-V2/archive/refs/heads/master.zip)** to get zip file🗃
+- Click on **[BOT-HOSTING.NET](https://bot-hosting.net/)** to deploy bot.
 - Create a server
 - Upload zip file 🗃️ 
 - Start server 👍
-- Click here to deploy on **[Render](https://render.com)**
+
+---
+
+## OTHER DEPLOYMENT PLATFORMS
+- **[Render](https://render.com)**
+- **[Katabump](https://dashboard.katabump.com/auth/login)**
 
 ---
 
