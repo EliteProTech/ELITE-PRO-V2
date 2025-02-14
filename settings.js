@@ -2,7 +2,7 @@ const fs = require('fs')
 const chalk = require('chalk')
 
 //session
-global.sessionid ='ur session id'
+global.sessionid ='paste ur session id'
 //owmner v card
 global.ytname = "YT: @elitepro-empire" //ur YouTube channel name
 global.socialm = "GitHub: Elite-MD" //ur github or insta name
