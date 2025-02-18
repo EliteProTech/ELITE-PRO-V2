@@ -94,7 +94,7 @@ const {  state, saveCreds } =await useMultiFileAuthState(`./session`)
    
    store.bind(EliteProEmpire.ev)
 
-    // login use pairing code
+    // login use pairing cod
    // source code https://github.com/WhiskeySockets/Baileys/blob/master/Example/example.ts#L61
    if (pairingCode && !EliteProEmpire.authState.creds.registered) {
       if (useMobile) throw new Error('Cannot use pairing code with mobile api')
