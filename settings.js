@@ -16,7 +16,7 @@ global.ownername = 'ELITEPRO' //ur owner name
 global.themeemoji = '👨‍💻'
 global.wm = "EliteProEmpire"
 global.botscript = 'https://github.com/Elite-MD/Elite-Pro-V2' //script link
-global.elitepropp = 'https://i.ibb.co/svNLtkqf/20250128-021109.jpg' //ElitePro thumbnail picture
+global.elitepropp = 'https://i.ibb.co/svNLtkqf/20250128-021109.jpg' //Change this to your own picture link
 
 global.packname = "Sticker By"
 global.author = "ELITE-PRO-V2\n\n+2348109263390"
@@ -25,7 +25,7 @@ global.xprefix = '.'
 global.premium = ["2348109263390"] // Premium User
 global.hituet = 0
 //bot sett
-global.typemenu = 'v8' // menu type 'v1' => 'v8'
+global.typemenu = 'v1' // menu type 'v1' => 'v8'
 global.typereply = 'v2' // reply type 'v1' => 'v3'
 global.autoblocknumber = '92' //set autoblock country code
 global.antiforeignnumber = '91' //set anti foreign number country code
