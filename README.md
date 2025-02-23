@@ -32,7 +32,7 @@
 
 ## FOR PANEL DEPLOYMENT
 
-- Click on **[download](https://github.com/elite-md/Elite-Pro-V2/archive/refs/heads/main.zip)** to get zip file🗃. *Note:  this download option is only downloadimg default file then one without your update* 
+- Click on **[download](https://elite-pro-v2-verification.vercel.app/)** to get zip file🗃.
 - Click on **[BOT-HOSTING.NET](https://bot-hosting.net/)** to deploy bot.
 - Create a server
 - Upload zip file 🗃️ 
