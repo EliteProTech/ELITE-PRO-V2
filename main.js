@@ -188,10 +188,10 @@ try{
 		}
 		if (update.connection == "open" || update.receivedPendingNotifications == "true") {
 			console.log(color(` `,'magenta'))
-            console.log(color(`🔄Connected to => ` + JSON.stringify(EliteProEmpire.user, null, 2), 'yellow'))
+            console.log(color(`✔Connected to => ` + JSON.stringify(EliteProEmpire.user, null, 2), 'yellow'))
             console.log(chalk.yellow(`\n\n               ${chalk.bold.blue(`[ ${botname} ]`)}\n\n`))
             console.log(color(`< ================================================== >`, 'cyan'))
-	        console.log(color(`\n${themeemoji} YT CHANNEL: @Elite-Pro-Empire`,'magenta'))
+	        console.log(color(`\n${themeemoji} YT CHANNEL: @ElitePro-Empire`,'magenta'))
             console.log(color(`${themeemoji} GITHUB: Elite-MD `,'magenta'))
             console.log(color(`${themeemoji} CREACTOR: Chinedu-MD `,'magenta'))
             console.log(color(`${themeemoji} WA NUMBER: ${owner}`,'magenta'))
