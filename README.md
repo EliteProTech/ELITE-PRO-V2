@@ -1,12 +1,12 @@
 <p align="center">
-  <a href="https://chat.whatsapp.com/GRIeuAnUgk54u2IL5ujUxJ">
-    <img alt=Support weight="10" src="https://telegra.ph/file/a8265ce43fbfcc43bffeb.jpg"> 
+  <a href="https://chat.whatsapp.com/IozXlwmmRzJ24un1jtjEZ2">
+    <img alt=Support weight="10" src="https://i.ibb.co/4Z1G2Bwz/file-XKVy-Fx-YD1t-Divb-Gsg43t-YE.webp"> 
     </p>
 <h1 align="center">ELITE-PRO-V2</h1>
 <p align="center"> 
     </p>
 <p align="center">
-  <a aria-label="Join our chats" href="https://chat.whatsapp.com/GRIeuAnUgk54u2IL5ujUxJ" target="_blank">
+  <a aria-label="Join our chats" href="https://chat.whatsapp.com/IozXlwmmRzJ24un1jtjEZ2" target="_blank">
     <img alt="whatsapp" src="https://img.shields.io/badge/Join Group chat-25D366?style=for-the-badge&logo=whatsapp&logoColor=white" />
     <a align="center">
   <a aria-label="Follow Channel" href="https://whatsapp.com/channel/0029VaXaqHII1rcmdDBBsd3g" target="_blank">
@@ -83,7 +83,7 @@ Paste this after the installation
 
 <p align="Left">
     <a align="center">
-  <a aria-label="WEBSITE" href="https://elite-production.vercel.app" target="_blank">
+  <a aria-label="WEBSITE" href="https://elitepro-website.vercel.app/" target="_blank">
     <img alt="ELITEPRO-WEB" src="https://img.shields.io/badge/ELITEPRO WEB-25D366?style=for-the-badge&logo=online&logoColor=white" />
 </a>
 <a aria-label="NEW REPO" href="https://github.com/elite-md/ELITEPRO" target="_blank">
