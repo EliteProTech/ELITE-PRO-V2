@@ -17,7 +17,7 @@
   </a>
 </p>
       
-   [![Typing SVG](https://readme-typing-svg.herokuapp.com?font=Rockstar-ExtraBold&color=BBDEFB&lines=WELCOME+TO+ELITE+PRO+V2+MADE+BY;CHINWO+CHINEDU+EMMANUEL;THANKS+FOR+VISITING+MY+REPO)](https://git.io/typing-svg)  
+   [![Typing SVG](https://readme-typing-svg.herokuapp.com?font=Rockstar-ExtraBold&color=1521A3&lines=WELCOME+TO+ELITE+PRO+V2+MADE+BY;CHINWO+CHINEDU+EMMANUEL;THANKS+FOR+VISITING+MY+REPO)](https://git.io/typing-svg)  
    
  ---
 
@@ -32,10 +32,10 @@
 
 ## FOR PANEL DEPLOYMENT
 
-- Click on **[download](https://elite-pro-v2-verification.vercel.app/)** to get zip file🗃.
-- Click on **[BOT-HOSTING.NET](https://bot-hosting.net/)** to deploy bot.
+- Click on **[DOWNLOAD](https://elite-pro-v2-verification.vercel.app/)** to get zip file🗃.
+- Deploy bot on **[BOT-HOSTING.NET](https://bot-hosting.net/)**
 - Create a server
-- Upload zip file 🗃️ 
+- Upload zip file there 🗃️ 
 - Start server 👍
 
 ---
@@ -43,6 +43,7 @@
 ## OTHER DEPLOYMENT PLATFORMS
 - **[Render](https://render.com)**
 - **[Katabump](https://dashboard.katabump.com/auth/login)**
+- **[Optiklink](https://optiklink.com/)**
 
 ---
 
@@ -60,7 +61,7 @@ pkg install wget
 pkg install imagemagick -y
 pkg install yarn
 termux-setup-storage
-cd /storage/emulated/0/Download/Elite-Pro-V2-master
+cd /storage/emulated/0/Download/Elite-Pro-V2-main
 yarn install
 npm start
 ```
@@ -68,7 +69,7 @@ npm start
 
 ## FOR STARTING TERMUX AGAIN
 ```
-cd /storage/emulated/0/Download/Elite-Pro-V2-master
+cd /storage/emulated/0/Download/Elite-Pro-V2-main
 npm start
 ```
 ---
@@ -94,7 +95,7 @@ Paste this after the installation
 ---
 
   ## DESCRIPTION
-I'm Elite-Pro a public WhatsApp bot with rich features Created by Chinwo Chinedu Emmanuel. Feel free to deploy my bot in any of the deployment site. 😜
+I'm Elite-Pro a public WhatsApp bot with rich features Created by Chinwo Chinedu Emmanuel. Feel free to deploy my bot in any deployment site. 😜
 
  --- 
 - Star ⭐ repo if you like this bot.
