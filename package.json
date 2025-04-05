@@ -1,7 +1,7 @@
 {
   "name": "Elite-Pro-V2",
   "version": "13.0.0",
-  "description": "A whatsapp bot with rich and multiple features",
+  "description": "A WhatsApp bot with rich and multiple features",
   "main": "index.js",
   "type": "commonjs",
   "directories": {
@@ -15,7 +15,7 @@
   "author": "ElitePro",
   "license": "MIT",
   "dependencies": {
-    "@whiskeysockets/baileys": "^6.7.2",
+    "baileys": "^6.7.16",
     "@adiwajshing/keyed-db": "^0.2.4",
     "@hapi/boom": "^10.0.1",
     "anime-wallpaper": "^1.0.2",
