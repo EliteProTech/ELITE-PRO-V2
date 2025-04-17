@@ -2,7 +2,7 @@
   "name": "Elite-Pro-V2",
   "version": "13.0.0",
   "description": "A WhatsApp bot with rich and multiple features",
-  "main": "index.js",
+  "main": "main.js",
   "type": "commonjs",
   "directories": {
     "lib": "lib",
@@ -18,6 +18,7 @@
     "baileys": "^6.7.16",
     "@adiwajshing/keyed-db": "^0.2.4",
     "@hapi/boom": "^10.0.1",
+    "express": "^4.18.2",    
     "anime-wallpaper": "^1.0.2",
     "api-dylux": "^1.4.4",
     "aptoide-scraper": "^1.0.1",
