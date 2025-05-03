@@ -32,7 +32,7 @@
 
 ## FOR PANEL DEPLOYMENT
 
-- Click on **[DOWNLOAD](https://elite-pro-v2-verification.vercel.app/)** to get zip file🗃.
+- Click on **[DOWNLOAD](https://eliteproverified.vercel.app/)** to get zip file🗃.
 - Deploy bot on **[BOT-HOSTING.NET](https://bot-hosting.net/)**
 - Create a server
 - Upload zip file there 🗃️ 
