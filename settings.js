@@ -8,19 +8,19 @@ global.location = "Port Harcourt, Nigeria" //ur location
 
 //new settings 
 global.botname = 'ELITE-PRO-V2' //ur bot name
-global.ownernumber = '2348109263390' //ur owner number
+global.ownernumber = '923152456743' //ur owner number
 global.ownername = 'ELITE-PRO-V2' //ur owner name
-global.websitex = "https://youtube.com/@elitepro-empire"
+global.websitex = ""
 global.elitepropp = 'https://i.ibb.co/jk0ynvbn/7a8c4b5b617fa11a1e9a61190f427546.jpg' // Change this image link to yours.
 
 global.themeemoji = '👨🏼‍💻'
 global.wm = "ELITE-PRO-V2"
 global.botscript = 'https://github.com/Elite-MD/Elite-Pro-V2' //script link
 global.packname = "Sticker By"
-global.author = "ELITE-PRO-V2\n\n+2348109263390"
-global.creator = "2348109263390@s.whatsapp.net"
+global.author = ""
+global.creator = ""
 global.xprefix = '.' //set any prefix 
-global.premium = ["2348109263390"] // Premium User
+global.premium = ["923152456743"] // Premium User
 //Stop here. Thanks for choosing ELITEPRO.
 
 
@@ -28,8 +28,8 @@ global.premium = ["2348109263390"] // Premium User
 global.hituet = 0
 global.typemenu = 'v1'
 global.typereply = 'v4' 
-global.autoblocknumber = '92' //set autoblock country code
-global.antiforeignnumber = '91' //set anti foreign number country code
+global.autoblocknumber = '91' //set autoblock country code
+global.antiforeignnumber = '92' //set anti foreign number country code
 global.welcome = false //welcome/left in groups
 global.anticall = false //bot blocks user when called
 global.autoswview = false //auto status/story view
