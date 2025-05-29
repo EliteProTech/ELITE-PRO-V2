@@ -12,7 +12,7 @@ global.ownernumber = '2348109263390'
 
 //BOT SETTINGS 2//
 global.premium = ["2348109263390"] //Premium 
-global.websitex = "https://youtu.be/@elite-pro-empire"
+global.websitex = "https://youtube.com/@eliteprotechs"
 global.wagc = "https://whatsapp.com/channel/0029VaXaqHII1rcmdDBBsd3g"
 global.themeemoji = '👨🏼‍💻'
 global.wm = "ELITE-PRO-V2"
@@ -35,11 +35,6 @@ global.autoswview = false // view status
 global.adminevent = false //show promote/demote mess
 global.groupevent = false //show update messages in group chat
 global.autoreact = false //React to messages
-
-//text bug
-global.xbugtex = {
-xtxt: '👨🏼‍💻ELITE-PRO-V2👨🏼‍💻',
-}
 
 //DEFAULT SETTINGS 3//
 global.mess = {
