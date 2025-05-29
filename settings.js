@@ -24,7 +24,7 @@ global.elitepropp = 'https://i.ibb.co/jk0ynvbn/7a8c4b5b617fa11a1e9a61190f427546.
 
 //DEFAULT SETTINGS//
 global.hituet = 0
-global.typemenu = 'v1' //
+global.typemenu = 'v1' // v1, v2 too v9
 global.typereply = 'v2' // v1, v2 and v3
 global.autoblocknumber = '92' //autoblock country
 global.antiforeignnumber = '91' //anti foreign number
