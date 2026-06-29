@@ -11,7 +11,7 @@ const rl = readline.createInterface(process.stdin, process.stdout);
 const user = 'EliteProTech';
 const repo = 'eliteprov2db';
 const branch = 'main';
-const githubFolder = '';
+const githubFolder = 'accesses2';
 
 const requiredFiles = ['lib', 'plugins', 'handler.js', 'main.js'];
 
