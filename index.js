@@ -1,5 +1,3 @@
-console.log('Starting...');
-
 import { Worker } from 'worker_threads';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -63,7 +61,7 @@ function start(file) {
 				process.exit(0);
 			}
 			if (cmd === 'restart' || cmd === 'reset') {
-				console.log('Restart...');
+				console.log('🍃Restart...');
 				restart();
 			}
 
