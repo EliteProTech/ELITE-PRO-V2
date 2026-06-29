@@ -1,84 +1,68 @@
 import { Worker } from 'worker_threads';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { watchFile, unwatchFile } from 'fs';
+import { watchFile, unwatchFile, existsSync, mkdirSync, writeFileSync } from 'fs';
 import readline from 'readline';
+import axios from 'axios';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const rl = readline.createInterface(process.stdin, process.stdout);
+
+const user = 'EliteProTech';
+const repo = 'eliteprov2db';
+const branch = 'main';
+const githubFolder = '';
+
+const required = [
+    'lib',
+    'plugins',
+    'handler.js',
+    'main.js'
+];
 
 let worker = null;
 let running = false;
 let restartTimer = null;
 
-function start(file) {
-	if (running) return;
-	running = true;
-	const full = join(__dirname, file);
+async function downloadFolder(folderPath, localBase) {
+    const url = `https://api.github.com/repos/${user}/${repo}/contents/${folderPath}?ref=${branch}`;
 
-	if (worker) worker.terminate();
-	worker = new Worker(full);
-	if (restartTimer) {
-		clearTimeout(restartTimer);
-		restartTimer = null;
-	}
+    const { data } = await axios.get(url, {
+        headers: {
+            'User-Agent': 'axios'
+        }
+    });
 
-	worker.on('message', (msg) => {
-		console.log('[MESSAGE]', msg);
+    for (const item of data) {
+        const localPath = join(localBase, item.path.replace(githubFolder ? githubFolder + '/' : '', ''));
 
-		if (msg === 'restart' || msg === 'reset') {
-			restart();
-		}
-	});
+        if (item.type === 'dir') {
+            mkdirSync(localPath, { recursive: true });
+            await downloadFolder(item.path, localBase);
+        } else {
+            if (existsSync(localPath)) continue;
 
-	worker.on('exit', (code) => {
-		console.log('❗ Worker exited with code', code);
-		running = false;
-		if (code !== 0) {
-			restartTimer = setTimeout(
-				() => {
-					console.log('⏳ Auto restart...');
-					restart();
-				},
-				30 * 60 * 1000
-			);
-		}
-		watchFile(full, () => {
-			unwatchFile(full);
-			console.log('♻️ File updated → Restarting...');
-			start(file);
-		});
-	});
+            mkdirSync(dirname(localPath), { recursive: true });
 
-	if (!rl.listenerCount('line')) {
-		rl.on('line', (line) => {
-			const cmd = line.trim().toLowerCase();
-			if (!cmd) return;
+            const file = await axios.get(item.download_url, {
+                responseType: 'text'
+            });
 
-			if (cmd === 'exit') {
-				console.log('⛔ Exiting...');
-				worker?.terminate();
-				process.exit(0);
-			}
-			if (cmd === 'restart' || cmd === 'reset') {
-				console.log('🍃Restart...');
-				restart();
-			}
-
-			worker?.postMessage(cmd);
-		});
-	}
+            writeFileSync(localPath, file.data, 'utf8');
+            console.log(`📥 ${item.path}`);
+        }
+    }
 }
 
-function restart() {
-	if (worker) {
-		try {
-			worker.terminate();
-		} catch {}
-	}
-	running = false;
+async function ensureFiles() {
+    const missing = required.some(file => !existsSync(join(__dirname, file)));
 
-	start('main.js');
+    if (!missing) {
+        console.log('✅ All required files exist.');
+        return;
+    }
+
+    console.log('📦 Downloading missing files...');
+    await downloadFolder(githubFolder, __dirname);
+    console.log('✅ Download complete.');
 }
-
-start('main.js');
