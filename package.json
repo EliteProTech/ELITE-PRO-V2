@@ -1,29 +1,19 @@
 {
   "name": "ELITE-PRO-V2",
   "version": "2.0.0",
-  "description": "Lightweight WhatsApp Multi-Device bot built with Baileys.",
-  "main": "index.js",
+  "author": "ElitePro",
   "type": "module",
-  "directories": {
-    "lib": "lib",
-    "plugins": "plugins"
-  },
+  "main": "index.js",
   "scripts": {
     "start": "node index.js"
   },
-  "author": "cyrilix",
-  "license": "ISC",
   "dependencies": {
-    "awesome-phonenumber": "^2.68.0",
-    "axios": "^1.6.0",
-    "baileys": "latest",
-    "chalk": "^5.0.0",
-    "cheerio": "^1.1.2",
-    "file-type": "^17.1.1",
-    "fluent-ffmpeg": "^2.1.3",
-    "lowdb": "^3.0.0",
-    "moment-timezone": "^0.5.33",
-    "node-webpmux": "^3.2.1",
-    "syntax-error": "^1.4.0"
+    "@whiskeysockets/baileys": "latest",
+    "@hapi/boom": "^10.0.1",
+    "chalk": "^4.1.2",
+    "fflate": "^0.8.2",
+    "file-type": "^21.0.0",
+    "jimp": "*",
+    "pino": "^8.17.2"
   }
 }
