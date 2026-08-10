@@ -1,19 +1,19 @@
 {
   "name": "ELITE-PRO-V2",
   "version": "2.0.0",
-  "author": "ElitePro",
+  "author": "EliteProTech",
   "type": "module",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
   },
   "dependencies": {
-    "@whiskeysockets/baileys": "latest",
+    "@whiskeysockets/baileys": "^7.0.0-rc14",
     "@hapi/boom": "^10.0.1",
     "chalk": "^4.1.2",
     "fflate": "^0.8.2",
     "file-type": "^21.0.0",
-    "jimp": "*",
+    "jimp": "^0.22.12",
     "pino": "^8.17.2"
   }
 }
