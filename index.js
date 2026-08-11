@@ -12,6 +12,8 @@ import {
 import { smsg, makeWASocket, bind, sendNotification, getGroupMetadata } from './lib/myfunc.js'
 import config from './config.js'
 
+global.config = config
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const pluginDir = path.join(__dirname, 'plugins')
 
@@ -146,7 +148,7 @@ export default async function handleMessage(EliteProTech, m) {
         m.text = body
         m.isButtonResponse = isButtonResponse
 
-        const owner = readJSON('./lib/database/owner.json')
+        const owner = readJSON('./database/owner.json')
         const number = m.sender.split('@')[0]
         const botNumber = EliteProTech.decodeJid(EliteProTech.user.id).split('@')[0]
         m.isOwner = owner.includes(number) || number === botNumber
@@ -157,6 +159,10 @@ export default async function handleMessage(EliteProTech, m) {
         }
         const checkAccess = handler => {
             const permissions = [
+                ['group', m.isGroup, config.botMessage.group],
+                ['private', m.isDM, config.botMessage.private],
+                ['admin', m.isAdmin, config.botMessage.admin],
+                ['isBotAdmin', m.isBotAdmin, config.botMessage.isBotAdmin],
                 ['owner', m.isOwner, config.botMessage.owner]
             ]
             for (const [key, allowed, message] of permissions) {
