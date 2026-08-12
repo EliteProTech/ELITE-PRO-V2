@@ -3,6 +3,7 @@ import fs from 'fs'
 import path from 'path'
 import pino from 'pino'
 import { Boom } from '@hapi/boom'
+import chalk from 'chalk'
 import { fileURLToPath, pathToFileURL } from 'url'
 import {
     useMultiFileAuthState,
@@ -157,6 +158,20 @@ export default async function handleMessage(EliteProTech, m) {
         const notifReply = async (text, title = 'Notification') => {
             await sendNotification(EliteProTech, m, title, text)
         }
+        const logCommandUsage = (command, extra = '') => {
+            const time = new Date().toLocaleTimeString()
+            const from = m.isGroup ? `group ${m.chat}` : 'DM'
+            console.log(
+                chalk.gray(`[${time}]`) +
+                chalk.cyan(' CMD ') +
+                chalk.yellow(`.${command}`) +
+                chalk.white(` from `) +
+                chalk.green(m.sender) +
+                chalk.white(` (${from})`) +
+                (extra ? chalk.magenta(` ${extra}`) : '')
+            )
+        }
+
         const checkAccess = handler => {
             const permissions = [
                 ['group', m.isGroup, config.botMessage.group],
@@ -194,6 +209,7 @@ export default async function handleMessage(EliteProTech, m) {
             const denied = checkAccess(handler)
             if (denied) return
 
+            logCommandUsage(command, '(button)')
             return await handler(m, {
                 EliteProTech,
                 args,
@@ -210,6 +226,7 @@ export default async function handleMessage(EliteProTech, m) {
             const denied = checkAccess(handler)
             if (denied) return
             const text = m.text.replace(handler.customPrefix, '').trim()
+            logCommandUsage(handler.customPrefix.toString(), '(custom prefix)')
             return await handler(m, {
                 EliteProTech,
                 args: text ? text.split(/\s+/) : [],
@@ -230,6 +247,7 @@ export default async function handleMessage(EliteProTech, m) {
         if (!handler) return
         const denied = checkAccess(handler)
         if (denied) return
+        logCommandUsage(command)
         await handler(m, {
             EliteProTech,
             args,
