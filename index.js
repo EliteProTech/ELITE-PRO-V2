@@ -182,7 +182,7 @@ export default async function handleMessage(EliteProTech, m) {
             ]
             for (const [key, allowed, message] of permissions) {
                 if (handler[key] && !allowed) {
-                    notifReply(message, 'Access Denied')
+                    if (!handler.silentDeny) notifReply(message, 'Access Denied')
                     return true
                 }
             }
