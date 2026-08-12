@@ -36,7 +36,7 @@ let handler = async (m, {
             return await m.reply('Please provide code to evaluate.')
         }
 
-        const fn = new AsyncFunction(
+        const paramNames = [
             'EliteProTech',
             'm',
             'args',
@@ -59,15 +59,10 @@ let handler = async (m, {
             'useSingleFileAuthState',
             'makeInMemoryStore',
             'DisconnectReason',
-            'Browsers',
-            `
-            return (async () => {
-                ${code}
-            })()
-            `
-        )
+            'Browsers'
+        ]
 
-        let result = await fn(
+        const paramValues = [
             EliteProTech,
             m,
             args,
@@ -91,7 +86,16 @@ let handler = async (m, {
             makeInMemoryStore,
             DisconnectReason,
             Browsers
-        )
+        ]
+
+        let fn
+        try {
+            fn = new AsyncFunction(...paramNames, `return (${code})`)
+        } catch {
+            fn = new AsyncFunction(...paramNames, code)
+        }
+
+        let result = await fn(...paramValues)
 
         if (typeof result !== 'string') {
             result = util.inspect(result, {
