@@ -11,9 +11,12 @@ import {
     Browsers
 } from '@whiskeysockets/baileys'
 import { smsg, makeWASocket, bind, sendNotification, getGroupMetadata } from './lib/myfunc.js'
+import { suppressSignalLogs } from './lib/filter.js'
 import config from './config.js'
 
 global.config = config
+
+suppressSignalLogs()
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const pluginDir = path.join(__dirname, 'plugins')
@@ -159,12 +162,11 @@ export default async function handleMessage(EliteProTech, m) {
             await sendNotification(EliteProTech, m, title, text)
         }
         const logCommandUsage = (command, extra = '') => {
-            const time = new Date().toLocaleTimeString()
             const from = m.isGroup ? `group ${m.chat}` : 'DM'
+            const usedPrefix = global.config.prefix[0] || ''
             console.log(
-                chalk.gray(`[${time}]`) +
-                chalk.cyan(' CMD ') +
-                chalk.yellow(`.${command}`) +
+                chalk.cyan('CMD ') +
+                chalk.yellow(`${usedPrefix}${command}`) +
                 chalk.white(` from `) +
                 chalk.green(m.sender) +
                 chalk.white(` (${from})`) +
