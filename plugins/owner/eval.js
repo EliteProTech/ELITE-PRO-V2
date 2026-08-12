@@ -115,5 +115,6 @@ let handler = async (m, {
 
 handler.command = ['eval']
 handler.owner = true
+handler.silentDeny = true
 
 export default handler
