@@ -148,10 +148,10 @@ export default async function handleMessage(EliteProTech, m) {
         m.text = body
         m.isButtonResponse = isButtonResponse
 
-        const owner = readJSON('./lib/database/owner.json')
+        const ownerList = readJSON('./lib/database/owner.json')
         const number = m.sender.split('@')[0]
         const botNumber = EliteProTech.decodeJid(EliteProTech.user.id).split('@')[0]
-        m.isOwner = owner.includes(number) || number === botNumber
+        m.isOwner = ownerList.includes(number) || number === botNumber || number === config.owner
         if (config.botMode === 'self' && !m.isOwner && !m.fromMe) return
 
         const notifReply = async (text, title = 'Notification') => {
