@@ -12,9 +12,7 @@ import {
 } from '@whiskeysockets/baileys'
 import { smsg, makeWASocket, bind, sendNotification, getGroupMetadata } from './lib/myfunc.js'
 import { suppressSignalLogs } from './lib/filter.js'
-import config from './config.js'
-
-global.config = config
+import './config.js'
 
 suppressSignalLogs()
 
@@ -155,15 +153,15 @@ export default async function handleMessage(EliteProTech, m) {
         const ownerList = readJSON('./lib/database/owner.json')
         const number = m.sender.split('@')[0]
         const botNumber = EliteProTech.decodeJid(EliteProTech.user.id).split('@')[0]
-        m.isOwner = ownerList.includes(number) || number === botNumber || number === config.owner
-        if (config.botMode === 'self' && !m.isOwner && !m.fromMe) return
+        m.isOwner = ownerList.includes(number) || number === botNumber || number === global.owner
+        if (global.botMode === 'self' && !m.isOwner && !m.fromMe) return
 
         const notifReply = async (text, title = 'Notification') => {
             await sendNotification(EliteProTech, m, title, text)
         }
         const logCommandUsage = (command, extra = '') => {
             const from = m.isGroup ? `group ${m.chat}` : 'DM'
-            const usedPrefix = global.config.prefix[0] || ''
+            const usedPrefix = global.prefix
             console.log(
                 chalk.cyan('CMD ') +
                 chalk.yellow(`${usedPrefix}${command}`) +
@@ -176,11 +174,11 @@ export default async function handleMessage(EliteProTech, m) {
 
         const checkAccess = handler => {
             const permissions = [
-                ['group', m.isGroup, config.botMessage.group],
-                ['private', m.isDM, config.botMessage.private],
-                ['admin', m.isAdmin, config.botMessage.admin],
-                ['isBotAdmin', m.isBotAdmin, config.botMessage.isBotAdmin],
-                ['owner', m.isOwner, config.botMessage.owner]
+                ['group', m.isGroup, global.botMessage.group],
+                ['private', m.isDM, global.botMessage.private],
+                ['admin', m.isAdmin, global.botMessage.admin],
+                ['isBotAdmin', m.isBotAdmin, global.botMessage.isBotAdmin],
+                ['owner', m.isOwner, global.botMessage.owner]
             ]
             for (const [key, allowed, message] of permissions) {
                 if (handler[key] && !allowed) {
@@ -193,13 +191,8 @@ export default async function handleMessage(EliteProTech, m) {
 
         if (isButtonResponse) {
             let bodyText = body
-            const prefixes = config.prefix || ['.']
-
-            for (const p of prefixes) {
-                if (bodyText.startsWith(p)) {
-                    bodyText = bodyText.slice(p.length)
-                    break
-                }
+            if (bodyText.startsWith(global.prefix)) {
+                bodyText = bodyText.slice(global.prefix.length)
             }
 
             const args = bodyText.trim().split(/\s+/)
@@ -239,7 +232,7 @@ export default async function handleMessage(EliteProTech, m) {
             })
         }
 
-        const prefix = (config.prefix || ['.']).find(p => m.text.startsWith(p))
+        const prefix = m.text.startsWith(global.prefix) ? global.prefix : null
         if (!prefix) return
         const body2 = m.text.slice(prefix.length).trim()
         if (!body2) return
@@ -307,6 +300,19 @@ async function start() {
             EliteProTech.ws?.close?.()
         }
 
+        global.session = process.env.SESSION_ID || ''
+        const credsPath = path.join(__dirname, 'session', 'creds.json')
+        if (!fs.existsSync(credsPath) && global.session) {
+            try {
+                const sessionData = JSON.parse(Buffer.from(global.session, 'base64').toString('utf-8'))
+                fs.mkdirSync(path.dirname(credsPath), { recursive: true })
+                fs.writeFileSync(credsPath, JSON.stringify(sessionData, null, 2))
+                console.log(chalk.greenBright('Session restored from SESSION_ID'))
+            } catch (err) {
+                console.error(chalk.redBright('Invalid SESSION_ID, falling back to pairing'))
+            }
+        }
+
         const { state, saveCreds } = await useMultiFileAuthState('./session')
 
         EliteProTech = makeWASocket({
@@ -336,16 +342,18 @@ async function start() {
 
         EliteProTech.ev.on('creds.update', saveCreds)
 
-        EliteProTech.ev.on('messages.upsert', async ({ messages }) => {
-            if (messages.length === 0) return
-            setImmediate(async () => {
-                try {
-                    let m = messages[0]
-                    if (!m?.message || m.key.remoteJid === 'status@broadcast') return
-                    m = await smsg(EliteProTech, m)
-                    if (m) await handleMessage(EliteProTech, m)
-                } catch (e) {}
-            })
+        EliteProTech.ev.on('messages.upsert', async ({ messages, type }) => {
+            if (type !== 'notify' || messages.length === 0) return
+            for (const raw of messages) {
+                setImmediate(async () => {
+                    try {
+                        let m = raw
+                        if (!m?.message || m.key.remoteJid === 'status@broadcast') return
+                        m = await smsg(EliteProTech, m)
+                        if (m) await handleMessage(EliteProTech, m)
+                    } catch (e) {}
+                })
+            }
         })
 
         EliteProTech.ev.on('connection.update', async ({ connection, lastDisconnect }) => {
