@@ -320,6 +320,7 @@ async function start() {
             logger: pino({ level: 'silent' }),
             printQRInTerminal: false,
             markOnlineOnConnect: true,
+            syncFullHistory: false,
             cachedGroupMetadata: async (jid) => getGroupMetadata(EliteProTech, jid),
         })
 
