@@ -300,7 +300,6 @@ async function start() {
             EliteProTech.ws?.close?.()
         }
 
-        global.session = process.env.SESSION_ID || ''
         const credsPath = path.join(__dirname, 'session', 'creds.json')
         if (!fs.existsSync(credsPath) && global.session) {
             try {
@@ -309,7 +308,7 @@ async function start() {
                 fs.writeFileSync(credsPath, JSON.stringify(sessionData, null, 2))
                 console.log(chalk.greenBright('Session restored from SESSION_ID'))
             } catch (err) {
-                console.error(chalk.redBright('Invalid SESSION_ID, falling back to pairing'))
+                console.error(chalk.redBright(`Invalid SESSION_ID, falling back to pairing`))
             }
         }
 
