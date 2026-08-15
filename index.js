@@ -19,6 +19,14 @@ suppressSignalLogs()
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const pluginDir = path.join(__dirname, 'plugins')
 
+const settingsPath = path.join(__dirname, 'lib', 'database', 'settings.json')
+try {
+    const saved = JSON.parse(fs.readFileSync(settingsPath, 'utf-8'))
+    if (saved.mode === 'self' || saved.mode === 'public') {
+        global.botMode = saved.mode
+    }
+} catch {}
+
 export const plugins = new Map()
 
 const pluginCache = new Map()
