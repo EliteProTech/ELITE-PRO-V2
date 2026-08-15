@@ -1,28 +1,27 @@
+import { getGroupMetadata } from '../../lib/myfunc.js'
+
 let handler = async (m, { EliteProTech, text }) => {
-    if (!m.isGroup) {
-        return await m.reply('This command can only be used in groups.')
-    }
-
-    if (!m.isAdmin && !m.isOwner) {
-        return await m.reply('Only group admins can use this command.')
-    }
-
-    const metadata = await EliteProTech.groupMetadata(m.chat)
-    const participants = metadata.participants || []
+    const metadata = await getGroupMetadata(EliteProTech, m.chat)
+    const participants = metadata?.participants || []
 
     if (participants.length === 0) {
         return await m.reply('No participants found in this group.')
     }
 
-    const message = text?.trim()
-        ? `*${text.trim()}*\n\n`
+    let customMessage = text?.trim() || ''
+    if (!customMessage && m.quoted?.text) {
+        customMessage = m.quoted.text
+    }
+
+    const header = customMessage
+        ? `*${customMessage}*\n\n`
         : `*Tagging all members*\n\n`
 
-    let body = message
+    let body = header
     const mentions = []
 
     for (const p of participants) {
-        const jid = EliteProTech.decodeJid(p.id)
+        const jid = p.phoneNumber || await EliteProTech.resolveLidToJid(p.id) || p.id
         mentions.push(jid)
         body += `➤ @${jid.split('@')[0]}\n`
     }
@@ -36,5 +35,7 @@ let handler = async (m, { EliteProTech, text }) => {
 }
 
 handler.command = ['tagall', 'everyone']
+handler.group = true
+handler.admin = true
 
 export default handler
