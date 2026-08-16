@@ -18,7 +18,7 @@ suppressSignalLogs()
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const pluginDir = path.join(__dirname, 'plugins')
-const eventDir = path.join(__dirname, 'events')
+const eventDir = path.join(__dirname, 'lib', 'events')
 
 const settingsPath = path.join(__dirname, 'lib', 'database', 'settings.json')
 try {
