@@ -231,7 +231,7 @@ export default async function handleMessage(EliteProTech, m) {
             await sendNotification(EliteProTech, m, title, text)
         }
         const logCommandUsage = (command, extra = '') => {
-            const from = m.isGroup ? `group ${m.chat}` : 'DM'
+            const from = m.isGroup ? `group ${m.chat}` : (m.isNewsletter ? `channel ${m.chat}` : 'DM')
             const usedPrefix = global.prefix
             console.log(
                 chalk.cyan('CMD ') +
@@ -463,12 +463,6 @@ async function start() {
             }
         })
 
-        setInterval(() => {
-            if (EliteProTech?.user && EliteProTech?.ws?.readyState === 1) {
-                EliteProTech.sendPresenceUpdate('available')
-            }
-        }, 60000)
-
     } catch (e) {
         isConnecting = false
         if (!reconnectTimer) {
@@ -476,6 +470,12 @@ async function start() {
         }
     }
 }
+
+setInterval(() => {
+    if (EliteProTech?.user && EliteProTech?.ws?.readyState === 1) {
+        EliteProTech.sendPresenceUpdate('available')
+    }
+}, 60000)
 
 process.on('SIGINT', async () => {
     try {
