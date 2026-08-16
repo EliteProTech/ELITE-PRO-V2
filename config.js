@@ -9,6 +9,7 @@ global.prefix = '.'
 global.botMode = 'self'
 global.autoViewStatus = false
 global.autoLikeStatus = false
+
 global.botMessage = {
     owner: 'This feature is for the Owner only.',
     admin: 'This feature is for group Admins only.',
