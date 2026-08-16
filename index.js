@@ -29,6 +29,9 @@ try {
     if (typeof saved.autoViewStatus === 'boolean') {
         global.autoViewStatus = saved.autoViewStatus
     }
+    if (typeof saved.autoLikeStatus === 'boolean') {
+        global.autoLikeStatus = saved.autoLikeStatus
+    }
 } catch {}
 
 export const plugins = new Map()
@@ -394,7 +397,6 @@ async function start() {
         })
 
         bind(EliteProTech)
-        wireEventDispatchers(EliteProTech)
 
         if (!state.creds.registered) {
             console.log('Enter the phone number example: 234x');
@@ -444,6 +446,7 @@ async function start() {
                     await initEvents()
                     eventsLoaded = true
                 }
+                wireEventDispatchers(EliteProTech)
                 return
             }
 
@@ -460,6 +463,12 @@ async function start() {
             }
         })
 
+        setInterval(() => {
+            if (EliteProTech?.user && EliteProTech?.ws?.readyState === 1) {
+                EliteProTech.sendPresenceUpdate('available')
+            }
+        }, 60000)
+
     } catch (e) {
         isConnecting = false
         if (!reconnectTimer) {
@@ -467,12 +476,6 @@ async function start() {
         }
     }
 }
-
-setInterval(() => {
-    if (EliteProTech?.user && EliteProTech?.ws?.readyState === 1) {
-        EliteProTech.sendPresenceUpdate('available')
-    }
-}, 60000)
 
 process.on('SIGINT', async () => {
     try {
