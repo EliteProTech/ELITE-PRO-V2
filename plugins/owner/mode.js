@@ -1,18 +1,18 @@
 import fs from 'fs'
 import path from 'path'
 
-const MODE_PATH = path.join(process.cwd(), 'lib', 'database', 'settings.json')
+const SETTINGS_PATH = path.join(process.cwd(), 'lib', 'database', 'settings.json')
 
-function readMode() {
+function readSettings() {
     try {
-        return JSON.parse(fs.readFileSync(MODE_PATH, 'utf-8'))
+        return JSON.parse(fs.readFileSync(SETTINGS_PATH, 'utf-8'))
     } catch {
         return {}
     }
 }
 
-function writeMode(data) {
-    fs.writeFileSync(MODE_PATH, JSON.stringify(data, null, 2))
+function writeSettings(data) {
+    fs.writeFileSync(SETTINGS_PATH, JSON.stringify(data, null, 2))
 }
 
 let handler = async (m, { args }) => {
@@ -27,7 +27,10 @@ let handler = async (m, { args }) => {
     }
 
     global.botMode = choice
-    writeMode({ mode: choice })
+
+    const settings = readSettings()
+    settings.mode = choice
+    writeSettings(settings)
 
     await m.reply(`Bot mode set to *${choice}*.${choice === 'self' ? ' Only the owner can use commands now.' : ' Anyone can use commands now.'}`)
 }
