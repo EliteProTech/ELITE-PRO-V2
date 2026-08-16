@@ -18,6 +18,7 @@ suppressSignalLogs()
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const pluginDir = path.join(__dirname, 'plugins')
+const eventDir = path.join(__dirname, 'events')
 
 const settingsPath = path.join(__dirname, 'lib', 'database', 'settings.json')
 try {
@@ -25,11 +26,16 @@ try {
     if (saved.mode === 'self' || saved.mode === 'public') {
         global.botMode = saved.mode
     }
+    if (typeof saved.autoViewStatus === 'boolean') {
+        global.autoViewStatus = saved.autoViewStatus
+    }
 } catch {}
 
 export const plugins = new Map()
+export const eventHandlers = new Map()
 
 const pluginCache = new Map()
+const eventCache = new Map()
 const watchers = new Map()
 const pendingReloads = new Map()
 
@@ -87,10 +93,64 @@ export async function initPlugins() {
     for (const file of getPluginFiles(pluginDir)) {
         await loadPlugin(file)
     }
-    watch(pluginDir)
+    watch(pluginDir, loadPlugin, unloadPlugin)
 }
 
-function watch(dir) {
+async function loadEventFile(file) {
+    try {
+        const module = await import(`${pathToFileURL(file).href}?update=${Date.now()}`)
+        const handler = module.default
+        if (!handler || !handler.on) return
+        eventHandlers.set(file, handler)
+        eventCache.set(file, true)
+        console.log(`[EVENT] Loaded ${path.relative(eventDir, file)}`)
+    } catch (e) {
+        console.error(`[EVENT] Failed ${file}`)
+        console.error(e)
+    }
+}
+
+async function unloadEventFile(file) {
+    if (!eventCache.has(file)) return
+    eventHandlers.delete(file)
+    eventCache.delete(file)
+    console.log(`[EVENT] Unloaded ${path.relative(eventDir, file)}`)
+}
+
+export async function initEvents() {
+    for (const file of getPluginFiles(eventDir)) {
+        await loadEventFile(file)
+    }
+    watch(eventDir, loadEventFile, unloadEventFile)
+}
+
+const wiredEventNames = new Set()
+
+function handlerEventNames(handler) {
+    if (!handler.on) return []
+    return Array.isArray(handler.on) ? handler.on : [handler.on]
+}
+
+export function wireEventDispatchers(EliteProTech) {
+    wiredEventNames.clear()
+    const names = new Set([...eventHandlers.values()].flatMap(handlerEventNames))
+    for (const name of names) {
+        if (wiredEventNames.has(name)) continue
+        wiredEventNames.add(name)
+        EliteProTech.ev.on(name, async (data) => {
+            for (const handler of eventHandlers.values()) {
+                if (!handlerEventNames(handler).includes(name)) continue
+                try {
+                    await handler(EliteProTech, data)
+                } catch (e) {
+                    console.error(`[EVENT] Error in handler for ${name}:`, e)
+                }
+            }
+        })
+    }
+}
+
+function watch(dir, loadFn, unloadFn) {
     if (watchers.has(dir)) return
     watchers.set(dir, fs.watch(dir, (_, filename) => {
         if (!filename || !filename.endsWith('.js')) return
@@ -98,12 +158,12 @@ function watch(dir) {
         if (pendingReloads.has(file)) clearTimeout(pendingReloads.get(file))
         pendingReloads.set(file, setTimeout(async () => {
             pendingReloads.delete(file)
-            if (fs.existsSync(file)) await loadPlugin(file)
-            else await unloadPlugin(file)
+            if (fs.existsSync(file)) await loadFn(file)
+            else await unloadFn(file)
         }, 200))
     }))
     for (const item of fs.readdirSync(dir, { withFileTypes: true })) {
-        if (item.isDirectory()) watch(path.join(dir, item.name))
+        if (item.isDirectory()) watch(path.join(dir, item.name), loadFn, unloadFn)
     }
 }
 
@@ -274,6 +334,7 @@ const question = text => new Promise(resolve => rl.question(text, resolve))
 let EliteProTech
 let reconnectTimer = null
 let pluginsLoaded = false
+let eventsLoaded = false
 let isConnecting = false
 
 const getStatusCode = lastDisconnect => {
@@ -333,6 +394,7 @@ async function start() {
         })
 
         bind(EliteProTech)
+        wireEventDispatchers(EliteProTech)
 
         if (!state.creds.registered) {
             console.log('Enter the phone number example: 234x');
@@ -377,6 +439,10 @@ async function start() {
                 if (!pluginsLoaded) {
                     await initPlugins()
                     pluginsLoaded = true
+                }
+                if (!eventsLoaded) {
+                    await initEvents()
+                    eventsLoaded = true
                 }
                 return
             }
