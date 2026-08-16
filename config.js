@@ -8,11 +8,7 @@ global.botName = 'ELITE-PRO-V2'
 global.prefix = '.'
 global.botMode = 'self'
 global.autoViewStatus = false
-
-global.stickerPack = {
-    packname: 'ELITE-PRO-V2',
-    author: 'EliteProTech'
-}
+global.autoLikeStatus = false
 global.botMessage = {
     owner: 'This feature is for the Owner only.',
     admin: 'This feature is for group Admins only.',
