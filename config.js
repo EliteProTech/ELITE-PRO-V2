@@ -16,6 +16,10 @@ global.botMessage = {
     private: 'This command can only be used in a private chat.',
     isBotAdmin: 'I need to be an admin in this group to do that.'
 }
+global.stickerPack = {
+    packname: 'ELITE-PRO-V2',
+    author: 'EliteProTech'
+}
 
 const file = fileURLToPath(import.meta.url)
 
