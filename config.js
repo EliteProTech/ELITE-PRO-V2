@@ -23,9 +23,7 @@ global.stickerPack = {
 }
 
 const file = fileURLToPath(import.meta.url)
-
 global.session = process.env.SESSION_ID || ''
-
 fs.watchFile(file, () => {
     fs.unwatchFile(file)
     console.log(chalk.redBright(`Update 'config.js'`))
