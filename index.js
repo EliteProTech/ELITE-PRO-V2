@@ -1,6 +1,7 @@
 import readline from 'readline'
 import fs from 'fs'
 import path from 'path'
+import http from 'http'
 import pino from 'pino'
 import { Boom } from '@hapi/boom'
 import chalk from 'chalk'
@@ -43,6 +44,14 @@ const watchers = new Map()
 const pendingReloads = new Map()
 
 const readJSON = file => JSON.parse(fs.readFileSync(file))
+
+function parseSessionData(raw) {
+    const trimmed = raw.trim()
+    if (trimmed.startsWith('{')) {
+        return JSON.parse(trimmed)
+    }
+    return JSON.parse(Buffer.from(trimmed, 'base64').toString('utf-8'))
+}
 
 function getPluginFiles(dir) {
     let files = []
@@ -344,6 +353,7 @@ let reconnectTimer = null
 let pluginsLoaded = false
 let eventsLoaded = false
 let isConnecting = false
+let connectionAnnounced = false
 
 const getStatusCode = lastDisconnect => {
     try {
@@ -380,7 +390,7 @@ async function start() {
         const credsPath = path.join(__dirname, 'session', 'creds.json')
         if (!fs.existsSync(credsPath) && global.session) {
             try {
-                const sessionData = JSON.parse(Buffer.from(global.session, 'base64').toString('utf-8'))
+                const sessionData = parseSessionData(global.session)
                 fs.mkdirSync(path.dirname(credsPath), { recursive: true })
                 fs.writeFileSync(credsPath, JSON.stringify(sessionData, null, 2))
                 console.log(chalk.greenBright('Session restored from SESSION_ID'))
@@ -452,6 +462,14 @@ async function start() {
                     eventsLoaded = true
                 }
                 wireEventDispatchers(EliteProTech)
+                if (!connectionAnnounced) {
+                    connectionAnnounced = true
+                    try {
+                        await EliteProTech.sendMessage(EliteProTech.user.id, {
+                            text: `*${global.botName}*\n\n${global.botMessage.connect}\n\nMode: *${global.botMode}*\nPrefix: *${global.prefix}*`
+                        })
+                    } catch (e) {}
+                }
                 return
             }
 
@@ -481,6 +499,17 @@ setInterval(() => {
         EliteProTech.sendPresenceUpdate('available')
     }
 }, 60000)
+
+const server = http.createServer((req, res) => {
+    res.writeHead(200, { 'Content-Type': 'text/plain' })
+    res.end(`${global.botName || 'Bot'} is running`)
+})
+
+const PORT = process.env.PORT || 3000
+
+server.listen(PORT, () => {
+    console.log(chalk.greenBright(`[SERVER] Listening on port ${PORT}`))
+})
 
 process.on('SIGINT', async () => {
     try {
