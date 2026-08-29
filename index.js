@@ -464,7 +464,7 @@ async function start() {
                         const ownJid = EliteProTech.decodeJid(EliteProTech.user.id)
                         const botNumber = ownJid.split('@')[0]
                         await EliteProTech.sendMessage(ownJid, {
-                            text: `*${global.botName}*\n\nBot connected successfully.\n\nNumber: *${botNumber}*\nMode: *${global.botMode}*\nPrefix: *${global.prefix}*`
+                            text: `*${global.botName}*\n\nBot connected successfully.\n\nNumber: *${botNumber}*\nMode: *${global.botMode}* Prefix: *${global.prefix}*`
                         })
                     } catch (e) {}
                 }
