@@ -14,13 +14,11 @@ let handler = async (m) => {
         const category = h.category || 'Other'
         if (!byCategory[category]) byCategory[category] = []
 
-        const commands = Array.isArray(h.command) ? h.command : [h.command]
-        const commandText = commands
+        const commands = (Array.isArray(h.command) ? h.command : [h.command])
             .filter(Boolean)
             .map(command => `${global.prefix || ''}${command}`)
-            .join(' / ')
 
-        if (commandText) byCategory[category].push(commandText)
+        if (commands.length) byCategory[category].push(...commands)
     }
 
     let text = `*${global.botName} — Menu*\n`
@@ -31,8 +29,8 @@ let handler = async (m) => {
 
         const commands = [...new Set(byCategory[category])].sort()
 
-        for (const command of commands) {
-            text += `➤ ${command}\n`
+        for (let index = 0; index < commands.length; index += 2) {
+            text += `➤ ${commands.slice(index, index + 2).join('   |   ')}\n`
         }
 
         text += '\n'

@@ -23,6 +23,7 @@ const defaultSettings = {
     mode: 'self',
     autoViewStatus: false,
     autoLikeStatus: false,
+    autoRead: false,
     autoRecording: false,
     autoTyping: false,
     autoRecordType: false
@@ -33,6 +34,7 @@ try {
     global.botMode = saved.mode === 'public' ? 'public' : defaultSettings.mode
     global.autoViewStatus = typeof saved.autoViewStatus === 'boolean' ? saved.autoViewStatus : defaultSettings.autoViewStatus
     global.autoLikeStatus = typeof saved.autoLikeStatus === 'boolean' ? saved.autoLikeStatus : defaultSettings.autoLikeStatus
+    global.autoRead = typeof saved.autoRead === 'boolean' ? saved.autoRead : defaultSettings.autoRead
     global.autoRecording = typeof saved.autoRecording === 'boolean' ? saved.autoRecording : defaultSettings.autoRecording
     global.autoTyping = typeof saved.autoTyping === 'boolean' ? saved.autoTyping : defaultSettings.autoTyping
     global.autoRecordType = typeof saved.autoRecordType === 'boolean' ? saved.autoRecordType : defaultSettings.autoRecordType
@@ -42,6 +44,7 @@ try {
         botMode: defaultSettings.mode,
         autoViewStatus: defaultSettings.autoViewStatus,
         autoLikeStatus: defaultSettings.autoLikeStatus,
+        autoRead: defaultSettings.autoRead,
         autoRecording: defaultSettings.autoRecording,
         autoTyping: defaultSettings.autoTyping,
         autoRecordType: defaultSettings.autoRecordType
