@@ -63,6 +63,11 @@ async function loadPlugin(file) {
         if (pluginCache.has(file)) {
             for (const key of pluginCache.get(file)) plugins.delete(key)
         }
+        const relative = path.relative(pluginDir, file)
+        const parts = relative.split(path.sep)
+        handler.category = parts.length > 1
+            ? parts[0].replace(/[-_]/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+            : 'Other'
         const keys = []
         if (handler.command && !(handler.command instanceof RegExp)) {
             const commands = Array.isArray(handler.command) ? handler.command : [handler.command]
@@ -224,7 +229,7 @@ export default async function handleMessage(EliteProTech, m) {
         const ownerList = readJSON('./lib/database/owner.json')
         const number = m.sender.split('@')[0]
         const botNumber = EliteProTech.decodeJid(EliteProTech.user.id).split('@')[0]
-        m.isOwner = ownerList.includes(number) || number === botNumber || number === global.owner
+        m.isOwner = ownerList.includes(number) || number === botNumber
         if (global.botMode === 'self' && !m.isOwner && !m.fromMe) return
 
         const notifReply = async (text, title = 'Notification') => {
