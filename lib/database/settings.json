@@ -1,0 +1,9 @@
+{
+  "prefix": ".",
+  "mode": "self",
+  "autoViewStatus": false,
+  "autoLikeStatus": false,
+  "autoRecording": false,
+  "autoTyping": false,
+  "autoRecordType": false
+}
