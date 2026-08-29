@@ -6,11 +6,7 @@ import pino from 'pino'
 import { Boom } from '@hapi/boom'
 import chalk from 'chalk'
 import { fileURLToPath, pathToFileURL } from 'url'
-import {
-    useMultiFileAuthState,
-    DisconnectReason,
-    Browsers
-} from '@whiskeysockets/baileys'
+import { useMultiFileAuthState, DisconnectReason, Browsers } from '@whiskeysockets/baileys'
 import { smsg, makeWASocket, bind, sendNotification, getGroupMetadata } from './lib/myfunc.js'
 import { suppressSignalLogs } from './lib/filter.js'
 import './config.js'
