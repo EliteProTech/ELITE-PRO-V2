@@ -461,10 +461,14 @@ async function start() {
                 if (!connectionAnnounced) {
                     connectionAnnounced = true
                     try {
-                        await EliteProTech.sendMessage(EliteProTech.user.id, {
-                            text: `*${global.botName}*\n\nBot connected successfully.\n\nMode: *${global.botMode}*\nPrefix: *${global.prefix}*`
+                        const ownJid = EliteProTech.decodeJid(EliteProTech.user.id)
+                        const botNumber = ownJid.split('@')[0]
+                        await EliteProTech.sendMessage(ownJid, {
+                            text: `*${global.botName}*\n\nBot connected successfully.\n\nNumber: *${botNumber}*\nMode: *${global.botMode}*\nPrefix: *${global.prefix}*`
                         })
-                    } catch (e) {}
+                    } catch (e) {
+                        console.error('[CONNECT] Failed to send connection message:', e)
+                    }
                 }
                 return
             }
