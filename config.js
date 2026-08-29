@@ -3,7 +3,6 @@ import fs from 'fs'
 import chalk from 'chalk'
 import 'dotenv/config'
 
-global.owner = '2347047504860'
 global.ownerName = 'EliteProTech'
 global.botName = 'ELITE-PRO-V2'
 global.prefix = '.'
