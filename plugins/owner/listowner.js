@@ -11,11 +11,12 @@ function readOwners() {
     }
 }
 
-let handler = async (m) => {
+let handler = async (m, { EliteProTech }) => {
     const owners = readOwners()
+    const botNumber = EliteProTech.decodeJid(EliteProTech.user.id).split('@')[0]
 
     let text = `*Owner List*\n\n`
-    text += `➤ ${global.owner} (primary)\n`
+    text += `➤ ${botNumber} (primary)\n`
 
     if (owners.length) {
         for (const number of owners) {
