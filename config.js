@@ -15,8 +15,7 @@ global.botMessage = {
     admin: 'This feature is for group Admins only.',
     group: 'This command can only be used in a group.',
     private: 'This command can only be used in a private chat.',
-    isBotAdmin: 'I need to be an admin in this group to do that.',
-    connect: 'Bot connected successfully.'
+    isBotAdmin: 'I need to be an admin in this group to do that.'
 }
 global.stickerPack = {
     packname: 'ELITE-PRO-V2',
