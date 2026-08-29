@@ -5,6 +5,7 @@ import 'dotenv/config'
 
 global.ownerName = 'EliteProTech'
 global.botName = 'ELITE-PRO-V2'
+global.repo = 'https://github.com/EliteProTech/ELITE-PRO-V2.git'
 global.autoViewStatus = false
 global.autoLikeStatus = false
 
