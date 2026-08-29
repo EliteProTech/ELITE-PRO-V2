@@ -462,7 +462,7 @@ async function start() {
                     connectionAnnounced = true
                     try {
                         await EliteProTech.sendMessage(EliteProTech.user.id, {
-                            text: `*${global.botName}*\n\n${global.botMessage.connect}\n\nMode: *${global.botMode}*\nPrefix: *${global.prefix}*`
+                            text: `*${global.botName}*\n\nBot connected successfully.\n\nMode: *${global.botMode}*\nPrefix: *${global.prefix}*`
                         })
                     } catch (e) {}
                 }
