@@ -3,6 +3,7 @@
   "mode": "self",
   "autoViewStatus": false,
   "autoLikeStatus": false,
+  "autoRead": false,
   "autoRecording": false,
   "autoTyping": false,
   "autoRecordType": false
