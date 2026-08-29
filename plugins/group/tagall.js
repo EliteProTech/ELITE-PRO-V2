@@ -1,7 +1,7 @@
 import { getGroupMetadata } from '../../lib/myfunc.js'
 
 let handler = async (m, { EliteProTech, text }) => {
-    const metadata = await getGroupMetadata(EliteProTech, m.chat)
+    const metadata = await getGroupMetadata(EliteProTech, m.chat, true)
     const participants = metadata?.participants || []
 
     if (participants.length === 0) {
@@ -21,12 +21,13 @@ let handler = async (m, { EliteProTech, text }) => {
     const mentions = []
 
     for (const p of participants) {
-        const jid = p.phoneNumber || await EliteProTech.resolveLidToJid(p.id) || p.id
+        const jid = EliteProTech.decodeJid(p.phoneNumber || await EliteProTech.resolveLidToJid(p.id) || p.id)
+        if (!jid || mentions.includes(jid)) continue
         mentions.push(jid)
         body += `➤ @${jid.split('@')[0]}\n`
     }
 
-    body += `\n*Total:* ${participants.length} member(s)`
+    body += `\n*Total:* ${mentions.length} member(s)`
 
     await EliteProTech.sendMessage(m.chat, {
         text: body,

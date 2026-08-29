@@ -8,7 +8,7 @@ const MEDIA_KEY_BY_MTYPE = {
 }
 
 let handler = async (m, { EliteProTech, text }) => {
-    const metadata = await getGroupMetadata(EliteProTech, m.chat)
+    const metadata = await getGroupMetadata(EliteProTech, m.chat, true)
     const participants = metadata?.participants || []
 
     if (participants.length === 0) {
@@ -17,7 +17,8 @@ let handler = async (m, { EliteProTech, text }) => {
 
     const mentions = []
     for (const p of participants) {
-        mentions.push(p.phoneNumber || await EliteProTech.resolveLidToJid(p.id) || p.id)
+        const jid = EliteProTech.decodeJid(p.phoneNumber || await EliteProTech.resolveLidToJid(p.id) || p.id)
+        if (jid && !mentions.includes(jid)) mentions.push(jid)
     }
 
     const caption = text?.trim() || m.quoted?.text || ''
