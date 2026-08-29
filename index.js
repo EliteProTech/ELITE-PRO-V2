@@ -184,7 +184,8 @@ function extractCommandFromMessage(m) {
     let body = ''
     let isButtonResponse = false
     try {
-        if (m.message) {
+        if (typeof m.text === 'string' && m.text) body = m.text
+        if (m.message && !body) {
             if (m.message.conversation) body = m.message.conversation
             else if (m.message.extendedTextMessage?.text) body = m.message.extendedTextMessage.text
             else if (m.message.imageMessage?.caption) body = m.message.imageMessage.caption
