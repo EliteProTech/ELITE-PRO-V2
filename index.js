@@ -18,18 +18,35 @@ const pluginDir = path.join(__dirname, 'plugins')
 const eventDir = path.join(__dirname, 'lib', 'events')
 
 const settingsPath = path.join(__dirname, 'lib', 'database', 'settings.json')
+const defaultSettings = {
+    prefix: '.',
+    mode: 'self',
+    autoViewStatus: false,
+    autoLikeStatus: false,
+    autoRecording: false,
+    autoTyping: false,
+    autoRecordType: false
+}
 try {
     const saved = JSON.parse(fs.readFileSync(settingsPath, 'utf-8'))
-    if (saved.mode === 'self' || saved.mode === 'public') {
-        global.botMode = saved.mode
-    }
-    if (typeof saved.autoViewStatus === 'boolean') {
-        global.autoViewStatus = saved.autoViewStatus
-    }
-    if (typeof saved.autoLikeStatus === 'boolean') {
-        global.autoLikeStatus = saved.autoLikeStatus
-    }
-} catch {}
+    global.prefix = typeof saved.prefix === 'string' ? saved.prefix : defaultSettings.prefix
+    global.botMode = saved.mode === 'public' ? 'public' : defaultSettings.mode
+    global.autoViewStatus = typeof saved.autoViewStatus === 'boolean' ? saved.autoViewStatus : defaultSettings.autoViewStatus
+    global.autoLikeStatus = typeof saved.autoLikeStatus === 'boolean' ? saved.autoLikeStatus : defaultSettings.autoLikeStatus
+    global.autoRecording = typeof saved.autoRecording === 'boolean' ? saved.autoRecording : defaultSettings.autoRecording
+    global.autoTyping = typeof saved.autoTyping === 'boolean' ? saved.autoTyping : defaultSettings.autoTyping
+    global.autoRecordType = typeof saved.autoRecordType === 'boolean' ? saved.autoRecordType : defaultSettings.autoRecordType
+} catch {
+    Object.assign(global, {
+        prefix: defaultSettings.prefix,
+        botMode: defaultSettings.mode,
+        autoViewStatus: defaultSettings.autoViewStatus,
+        autoLikeStatus: defaultSettings.autoLikeStatus,
+        autoRecording: defaultSettings.autoRecording,
+        autoTyping: defaultSettings.autoTyping,
+        autoRecordType: defaultSettings.autoRecordType
+    })
+}
 
 export const plugins = new Map()
 export const eventHandlers = new Map()
@@ -314,8 +331,8 @@ export default async function handleMessage(EliteProTech, m) {
             })
         }
 
-        const prefix = m.text.startsWith(global.prefix) ? global.prefix : null
-        if (!prefix) return
+        const prefix = global.prefix
+        if (prefix && !m.text.startsWith(prefix)) return
         const body2 = m.text.slice(prefix.length).trim()
         if (!body2) return
         const args = body2.split(/\s+/)
@@ -465,7 +482,7 @@ async function start() {
                         const ownJid = EliteProTech.decodeJid(EliteProTech.user.id)
                         const botNumber = ownJid.split('@')[0]
                         await EliteProTech.sendMessage(ownJid, {
-                            text: `*${global.botName}*\n\nBot connected successfully.\n\nNumber: *${botNumber}*\nMode: *${global.botMode}* | Prefix: *${global.prefix}*`
+                            text: `*${global.botName}*\n\nBot connected successfully.\n\nNumber: *${botNumber}*\nMode: *${global.botMode}* | Prefix: *${global.prefix || 'none'}*`
                         })
                     } catch (e) {}
                 }
