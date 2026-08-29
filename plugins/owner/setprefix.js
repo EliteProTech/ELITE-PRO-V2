@@ -29,7 +29,7 @@ let handler = async (m, { text }) => {
     settings.prefix = prefix
     fs.writeFileSync(SETTINGS_PATH, JSON.stringify(settings, null, 2))
 
-    await m.reply(`Prefix set to *${prefix || 'none'}*.`)
+    await m.reply(`Prefix set to *${prefix || 'none'}*`)
 }
 
 handler.command = ['setprefix']
