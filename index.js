@@ -466,9 +466,7 @@ async function start() {
                         await EliteProTech.sendMessage(ownJid, {
                             text: `*${global.botName}*\n\nBot connected successfully.\n\nNumber: *${botNumber}*\nMode: *${global.botMode}*\nPrefix: *${global.prefix}*`
                         })
-                    } catch (e) {
-                        console.error('[CONNECT] Failed to send connection message:', e)
-                    }
+                    } catch (e) {}
                 }
                 return
             }
