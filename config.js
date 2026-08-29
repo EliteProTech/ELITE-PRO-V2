@@ -5,8 +5,6 @@ import 'dotenv/config'
 
 global.ownerName = 'EliteProTech'
 global.botName = 'ELITE-PRO-V2'
-global.prefix = '.'
-global.botMode = 'self'
 global.autoViewStatus = false
 global.autoLikeStatus = false
 
