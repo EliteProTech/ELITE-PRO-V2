@@ -29,13 +29,14 @@ function extractNumber(m, args) {
     return null
 }
 
-let handler = async (m, { args }) => {
+let handler = async (m, { EliteProTech, args }) => {
     const number = extractNumber(m, args)
     if (!number) {
         return await m.reply('Provide a number, mention a user, or reply to their message.\nUsage: .delowner 234xxxxxxxxxx')
     }
-    if (number === String(global.owner)) {
-        return await m.reply('The primary owner (set in config) can\'t be removed this way.')
+    const botNumber = EliteProTech.decodeJid(EliteProTech.user.id).split('@')[0]
+    if (number === botNumber) {
+        return await m.reply('The primary owner (this bot\'s own number) can\'t be removed this way.')
     }
     const owners = readOwners()
     if (!owners.includes(number)) {
