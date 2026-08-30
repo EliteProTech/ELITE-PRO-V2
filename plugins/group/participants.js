@@ -17,6 +17,23 @@ function participantMatches(participant, jid) {
         .includes(jid)
 }
 
+async function getMentionTargets(EliteProTech, chat, targets) {
+    const metadata = await getGroupMetadata(EliteProTech, chat, true)
+    return targets.map(target => {
+        const participant = metadata?.participants?.find(item => participantMatches(item, target))
+        return EliteProTech.decodeJid(participant?.phoneNumber || target)
+    })
+}
+
+async function replySuccess(m, EliteProTech, action, targets, resolvedMentions) {
+    const mentions = resolvedMentions || await getMentionTargets(EliteProTech, m.chat, targets)
+    const people = mentions.map(jid => `@${jid.split('@')[0]}`).join(', ')
+    await EliteProTech.sendMessage(m.chat, {
+        text: `${action === 'add' ? 'Added' : 'Removed'} ${targets.length} member(s).\n${people}`,
+        mentions
+    }, { quoted: m })
+}
+
 let handler = async (m, { EliteProTech, args, command }) => {
     const targets = targetsFromMessage(m, args)
     if (!targets.length) {
@@ -24,10 +41,11 @@ let handler = async (m, { EliteProTech, args, command }) => {
     }
 
     const action = command === 'add' ? 'add' : 'remove'
+    const mentions = await getMentionTargets(EliteProTech, m.chat, targets)
     try {
         const result = await EliteProTech.groupParticipantsUpdate(m.chat, targets, action)
         const failed = result.filter(item => item.status && item.status !== '200')
-        if (!failed.length) return await m.reply(`${action === 'add' ? 'Added' : 'Removed'} ${targets.length} member(s).`)
+        if (!failed.length) return await replySuccess(m, EliteProTech, action, targets, mentions)
         throw new Error(`WhatsApp returned a non-success status for ${failed.length} member(s).`)
     } catch (error) {
         const metadata = await getGroupMetadata(EliteProTech, m.chat, true)
@@ -37,7 +55,7 @@ let handler = async (m, { EliteProTech, args, command }) => {
             : targets.every(target => members.some(participant => participantMatches(participant, target)))
 
         if (completed) {
-            return await m.reply(`${action === 'add' ? 'Added' : 'Removed'} ${targets.length} member(s).`)
+            return await replySuccess(m, EliteProTech, action, targets, mentions)
         }
         await m.reply(`Unable to ${action} the member: ${error.message || String(error)}`)
     }

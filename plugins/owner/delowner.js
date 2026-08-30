@@ -17,12 +17,11 @@ function writeOwners(owners) {
 }
 
 async function extractNumber(m, EliteProTech, args) {
-    if (args[0]) {
-        const digits = args[0].replace(/[^0-9]/g, '')
-        if (digits) return digits
-    }
     let jid = m.mentionedJid?.[0] || m.quoted?.sender
-    if (!jid) return null
+    if (!jid) {
+        const value = args.find(arg => !arg.startsWith('@'))
+        return value?.replace(/[^0-9]/g, '') || null
+    }
     if (jid.endsWith('@lid') && m.isGroup) {
         const metadata = await getGroupMetadata(EliteProTech, m.chat, true)
         const participant = metadata?.participants?.find(p => p.id === jid || p.lid === jid)

@@ -15,12 +15,12 @@ function writeOwners(owners) {
     fs.writeFileSync(OWNER_DB_PATH, JSON.stringify(owners, null, 2))
 }
 async function extractOwner(m, EliteProTech, args) {
-    if (args[0]) {
-        const digits = args[0].replace(/[^0-9]/g, '')
-        if (digits) return { number: digits, legacyLidNumber: null }
-    }
     const originalJid = m.mentionedJid?.[0] || m.quoted?.sender
-    if (!originalJid) return null
+    if (!originalJid) {
+        const value = args.find(arg => !arg.startsWith('@'))
+        const digits = value?.replace(/[^0-9]/g, '')
+        return digits ? { number: digits, legacyLidNumber: null } : null
+    }
 
     let jid = originalJid
     if (jid.endsWith('@lid') && m.isGroup) {
