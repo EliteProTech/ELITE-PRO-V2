@@ -3,6 +3,7 @@ import { plugins } from '../../index.js'
 let handler = async (m) => {
     const byCategory = {}
     const seen = new Set()
+    const pushName = String(m.pushName || 'User').trim().replace(/[*_`~]/g, '') || 'User'
 
     for (const h of plugins.values()) {
         if (seen.has(h)) continue
@@ -22,6 +23,7 @@ let handler = async (m) => {
     }
 
     let text = `*${global.botName} — Menu*\n`
+    text += `Hello, *${pushName}*\n`
     text += `Prefix: ${global.prefix || 'none'} | Mode: ${global.botMode}\n\n`
 
     for (const category of Object.keys(byCategory).sort()) {
