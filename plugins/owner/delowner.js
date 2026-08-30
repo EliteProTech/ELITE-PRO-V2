@@ -1,5 +1,6 @@
 import fs from 'fs'
 import path from 'path'
+import { getGroupMetadata } from '../../lib/myfunc.js'
 
 const OWNER_DB_PATH = path.join(process.cwd(), 'lib', 'database', 'owner.json')
 
@@ -15,22 +16,24 @@ function writeOwners(owners) {
     fs.writeFileSync(OWNER_DB_PATH, JSON.stringify(owners, null, 2))
 }
 
-function extractNumber(m, args) {
+async function extractNumber(m, EliteProTech, args) {
     if (args[0]) {
         const digits = args[0].replace(/[^0-9]/g, '')
         if (digits) return digits
     }
-    if (m.mentionedJid?.length) {
-        return m.mentionedJid[0].split('@')[0]
+    let jid = m.mentionedJid?.[0] || m.quoted?.sender
+    if (!jid) return null
+    if (jid.endsWith('@lid') && m.isGroup) {
+        const metadata = await getGroupMetadata(EliteProTech, m.chat, true)
+        const participant = metadata?.participants?.find(p => p.id === jid || p.lid === jid)
+        jid = participant?.phoneNumber || jid
     }
-    if (m.quoted?.sender) {
-        return m.quoted.sender.split('@')[0]
-    }
-    return null
+    if (jid.endsWith('@lid')) jid = await EliteProTech.resolveLidToJid(jid)
+    return jid?.endsWith('@lid') ? null : jid?.split('@')[0].replace(/\D/g, '')
 }
 
 let handler = async (m, { EliteProTech, args }) => {
-    const number = extractNumber(m, args)
+    const number = await extractNumber(m, EliteProTech, args)
     if (!number) {
         return await m.reply(`Provide a number, mention a user, or reply to their message.\nUsage: ${global.prefix || ''}delowner 234xxxxxxxxxx`)
     }
