@@ -19,7 +19,7 @@ let handler = async (m, { EliteProTech, text }) => {
     }
 
     const lines = results.map((video, index) =>
-        `${index + 1}. *${video.title}*\n   Channel: ${video.author.name}\n   Duration: ${video.timestamp || 'Live'}\n   Views: ${video.views.toLocaleString()}\n   Link: ${video.url}`
+        `${index + 1}. *${video.title}*\nChannel: ${video.author.name} | Duration: ${video.timestamp || 'Live'} | Views: ${video.views.toLocaleString()}\n${video.url}`
     )
 
     const caption = `*YouTube results for:* ${query}\n\n${lines.join('\n\n')}`
