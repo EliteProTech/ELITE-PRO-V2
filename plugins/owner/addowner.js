@@ -1,5 +1,6 @@
 import fs from 'fs'
 import path from 'path'
+import { getGroupMetadata } from '../../lib/myfunc.js'
 
 const OWNER_DB_PATH = path.join(process.cwd(), 'lib', 'database', 'owner.json')
 
@@ -13,25 +14,35 @@ function readOwners() {
 function writeOwners(owners) {
     fs.writeFileSync(OWNER_DB_PATH, JSON.stringify(owners, null, 2))
 }
-function extractNumber(m, args) {
+async function extractOwner(m, EliteProTech, args) {
     if (args[0]) {
         const digits = args[0].replace(/[^0-9]/g, '')
-        if (digits) return digits
+        if (digits) return { number: digits, legacyLidNumber: null }
     }
-    if (m.mentionedJid?.length) {
-        return m.mentionedJid[0].split('@')[0]
+    const originalJid = m.mentionedJid?.[0] || m.quoted?.sender
+    if (!originalJid) return null
+
+    let jid = originalJid
+    if (jid.endsWith('@lid') && m.isGroup) {
+        const metadata = await getGroupMetadata(EliteProTech, m.chat, true)
+        const participant = metadata?.participants?.find(p => p.id === jid || p.lid === jid)
+        jid = participant?.phoneNumber || jid
     }
-    if (m.quoted?.sender) {
-        return m.quoted.sender.split('@')[0]
+    if (jid.endsWith('@lid')) jid = await EliteProTech.resolveLidToJid(jid)
+    if (!jid || jid.endsWith('@lid')) return null
+
+    return {
+        number: jid.split('@')[0].replace(/\D/g, ''),
+        legacyLidNumber: originalJid.endsWith('@lid') ? originalJid.split('@')[0] : null
     }
-    return null
 }
 
 let handler = async (m, { EliteProTech, args }) => {
-    const number = extractNumber(m, args)
-    if (!number) {
+    const target = await extractOwner(m, EliteProTech, args)
+    if (!target?.number) {
         return await m.reply(`Provide a number, mention a user, or reply to their message.\nUsage: ${global.prefix || ''}addowner 234xxxxxxxxxx`)
     }
+    const { number, legacyLidNumber } = target
     const botNumber = EliteProTech.decodeJid(EliteProTech.user.id).split('@')[0]
     if (number === botNumber) {
         return await m.reply('That number is already the primary owner.')
@@ -40,8 +51,7 @@ let handler = async (m, { EliteProTech, args }) => {
     if (owners.includes(number)) {
         return await m.reply(`${number} is already an owner.`)
     }
-    owners.push(number)
-    writeOwners(owners)
+    writeOwners([...new Set([...owners.filter(owner => owner !== legacyLidNumber), number])])
 
     await m.reply(`Added ${number} as an owner.`)
 }

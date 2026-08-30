@@ -9,7 +9,7 @@ import { fileURLToPath } from 'url'
 const execFileAsync = promisify(execFile)
 const projectRoot = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', '..')
 
-const SKIP_PREFIXES = ['session/', 'lib/database/settings.json', 'node_modules/', '.git/']
+const SKIP_PREFIXES = ['session/', 'lib/database/', 'node_modules/', '.git/', 'config.js']
 
 function shouldSkip(relPath) {
     return SKIP_PREFIXES.some(prefix => relPath === prefix || relPath.startsWith(prefix))
@@ -22,6 +22,10 @@ function parseRepo(repoUrl) {
 }
 
 async function updateViaGit() {
+    const { stdout: statusOutput } = await execFileAsync('git', ['-C', projectRoot, 'status', '--porcelain'])
+    if (statusOutput.trim()) {
+        throw new Error('Update cancelled because this bot has uncommitted local changes. Commit or stash them before running update.')
+    }
     const { stdout: branchOutput } = await execFileAsync('git', ['-C', projectRoot, 'branch', '--show-current'])
     const branch = branchOutput.trim() || 'main'
     const { stdout, stderr } = await execFileAsync('git', [
@@ -63,6 +67,8 @@ async function updateViaZip() {
         if (!relPath || shouldSkip(relPath)) continue
 
         const destPath = path.join(projectRoot, relPath)
+        const relativeDest = path.relative(projectRoot, destPath)
+        if (relativeDest.startsWith('..') || path.isAbsolute(relativeDest)) continue
         fs.mkdirSync(path.dirname(destPath), { recursive: true })
         fs.writeFileSync(destPath, Buffer.from(entries[name]))
         written++
