@@ -428,7 +428,7 @@ async function start() {
             browser: Browsers.ubuntu('Chrome'),
             logger: pino({ level: 'silent' }),
             printQRInTerminal: false,
-            markOnlineOnConnect: true,
+            markOnlineOnConnect: false,
             syncFullHistory: false,
             cachedGroupMetadata: async (jid) => getGroupMetadata(EliteProTech, jid),
         })
@@ -517,12 +517,6 @@ async function start() {
         }
     }
 }
-
-setInterval(() => {
-    if (EliteProTech?.user && EliteProTech?.ws?.readyState === 1) {
-        EliteProTech.sendPresenceUpdate('available')
-    }
-}, 60000)
 
 const server = http.createServer((req, res) => {
     res.writeHead(200, { 'Content-Type': 'text/plain' })
