@@ -283,7 +283,7 @@ export default async function handleMessage(EliteProTech, m) {
             const permissions = [
                 ['group', m.isGroup, global.botMessage.group],
                 ['private', m.isDM, global.botMessage.private],
-                ['admin', m.isAdmin, global.botMessage.admin],
+                ['admin', m.isAdmin || (handler.ownerBypassAdmin && m.isOwner), global.botMessage.admin],
                 ['isBotAdmin', m.isBotAdmin, global.botMessage.isBotAdmin],
                 ['owner', m.isOwner, global.botMessage.owner]
             ]

@@ -38,5 +38,7 @@ let handler = async (m, { EliteProTech, text }) => {
 handler.command = ['tagall', 'everyone']
 handler.group = true
 handler.admin = true
+handler.ownerBypassAdmin = true
+handler.isBotAdmin = true
 
 export default handler
