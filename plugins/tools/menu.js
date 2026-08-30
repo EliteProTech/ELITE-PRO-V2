@@ -29,8 +29,8 @@ let handler = async (m) => {
 
         const commands = [...new Set(byCategory[category])].sort()
 
-        for (const command of commands) {
-            text += `➤ ${command}\n`
+        for (let index = 0; index < commands.length; index += 2) {
+            text += `➤ ${commands.slice(index, index + 2).join('   |   ')}\n`
         }
 
         text += '\n'
