@@ -186,8 +186,13 @@ export function wireEventDispatchers(EliteProTech) {
 function watch(dir, loadFn, unloadFn) {
     if (watchers.has(dir)) return
     watchers.set(dir, fs.watch(dir, (_, filename) => {
-        if (!filename || !filename.endsWith('.js')) return
+        if (!filename) return
         const file = path.join(dir, filename)
+        if (fs.existsSync(file) && fs.statSync(file).isDirectory()) {
+            watch(file, loadFn, unloadFn)
+            return
+        }
+        if (!filename.endsWith('.js')) return
         if (pendingReloads.has(file)) clearTimeout(pendingReloads.get(file))
         pendingReloads.set(file, setTimeout(async () => {
             pendingReloads.delete(file)
