@@ -19,17 +19,24 @@ function participantMatches(participant, jid) {
 
 async function getMentionTargets(EliteProTech, chat, targets) {
     const metadata = await getGroupMetadata(EliteProTech, chat, true)
-    return targets.map(target => {
+    const resolved = []
+    for (const target of targets) {
         const participant = metadata?.participants?.find(item => participantMatches(item, target))
-        return EliteProTech.decodeJid(participant?.phoneNumber || target)
-    })
+        let jid = participant?.phoneNumber || target
+        if (jid.endsWith('@lid')) {
+            jid = await EliteProTech.resolveLidToJid(jid)
+        }
+        resolved.push(EliteProTech.decodeJid(jid))
+    }
+    return resolved
 }
 
 async function replySuccess(m, EliteProTech, action, targets, resolvedMentions) {
     const mentions = resolvedMentions || await getMentionTargets(EliteProTech, m.chat, targets)
-    const people = mentions.map(jid => `@${jid.split('@')[0]}`).join(', ')
+    const verb = action === 'add' ? 'has been added' : 'has been kicked'
+    const lines = mentions.map(jid => `• @${jid.split('@')[0]} ${verb}!`)
     await EliteProTech.sendMessage(m.chat, {
-        text: `${action === 'add' ? 'Added' : 'Removed'} ${targets.length} member(s).\n${people}`,
+        text: lines.join('\n'),
         mentions
     }, { quoted: m })
 }
