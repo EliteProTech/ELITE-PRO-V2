@@ -23,7 +23,7 @@ let handler = async (m, { EliteProTech }) => {
         await EliteProTech.query({
             tag: 'iq',
             attrs: {
-                to: '@s.whatsapp.net',
+                to: EliteProTech.decodeJid(EliteProTech.user.id),
                 type: 'set',
                 xmlns: 'w:profile:picture'
             },
