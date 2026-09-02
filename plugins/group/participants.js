@@ -26,18 +26,20 @@ async function getMentionTargets(EliteProTech, chat, targets) {
         if (jid.endsWith('@lid')) {
             jid = await EliteProTech.resolveLidToJid(jid)
         }
-        resolved.push(EliteProTech.decodeJid(jid))
+        resolved.push({ jid: EliteProTech.decodeJid(jid), resolved: !jid.endsWith('@lid') })
     }
     return resolved
 }
 
 async function replySuccess(m, EliteProTech, action, targets, resolvedMentions) {
-    const mentions = resolvedMentions || await getMentionTargets(EliteProTech, m.chat, targets)
+    const entries = resolvedMentions || await getMentionTargets(EliteProTech, m.chat, targets)
     const verb = action === 'add' ? 'has been added' : 'has been kicked'
-    const lines = mentions.map(jid => `• @${jid.split('@')[0]} ${verb}!`)
+    const lines = entries.map(entry =>
+        entry.resolved ? `• @${entry.jid.split('@')[0]} ${verb}!` : `• A member ${verb}!`
+    )
     await EliteProTech.sendMessage(m.chat, {
         text: lines.join('\n'),
-        mentions
+        mentions: entries.map(entry => entry.jid)
     }, { quoted: m })
 }
 
