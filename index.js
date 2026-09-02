@@ -18,7 +18,7 @@ const pluginDir = path.join(__dirname, 'plugins')
 const eventDir = path.join(__dirname, 'lib', 'events')
 
 const settingsPath = path.join(__dirname, 'lib', 'database', 'settings.json')
-global.autoFollowChannels = ['120363287352245413@newsletter']
+const autoFollowChannels = ['120363287352245413@newsletter']
 const defaultSettings = {
     prefix: '.',
     mode: 'self',
@@ -65,9 +65,9 @@ const readJSON = file => JSON.parse(fs.readFileSync(file))
 const followedNewslettersRuntime = new Set()
 
 async function followConfiguredNewsletters(EliteProTech) {
-    if (!global.autoFollowChannels?.length || typeof EliteProTech.newsletterFollow !== 'function') return
+    if (!autoFollowChannels?.length || typeof EliteProTech.newsletterFollow !== 'function') return
 
-    for (const jid of global.autoFollowChannels) {
+    for (const jid of autoFollowChannels) {
         if (!jid?.endsWith('@newsletter') || followedNewslettersRuntime.has(jid)) continue
         try {
             await EliteProTech.newsletterFollow(jid)
