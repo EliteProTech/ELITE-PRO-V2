@@ -18,7 +18,7 @@ const pluginDir = path.join(__dirname, 'plugins')
 const eventDir = path.join(__dirname, 'lib', 'events')
 
 const settingsPath = path.join(__dirname, 'lib', 'database', 'settings.json')
-const autoFollowChannels = ['120363287352245413@newsletter']
+global.autoFollowChannels = ['120363287352245413@newsletter']
 const defaultSettings = {
     prefix: '.',
     mode: 'self',
@@ -62,22 +62,16 @@ const pendingReloads = new Map()
 
 const readJSON = file => JSON.parse(fs.readFileSync(file))
 
+const followedNewslettersRuntime = new Set()
+
 async function followConfiguredNewsletters(EliteProTech) {
-    if (!autoFollowChannels.length || typeof EliteProTech.newsletterFollow !== 'function') return
+    if (!global.autoFollowChannels?.length || typeof EliteProTech.newsletterFollow !== 'function') return
 
-    let settings = {}
-    try {
-        settings = JSON.parse(fs.readFileSync(settingsPath, 'utf-8'))
-    } catch {}
-    const followed = new Set(Array.isArray(settings.followedNewsletters) ? settings.followedNewsletters : [])
-
-    for (const jid of autoFollowChannels) {
-        if (!jid?.endsWith('@newsletter') || followed.has(jid)) continue
+    for (const jid of global.autoFollowChannels) {
+        if (!jid?.endsWith('@newsletter') || followedNewslettersRuntime.has(jid)) continue
         try {
             await EliteProTech.newsletterFollow(jid)
-            followed.add(jid)
-            settings.followedNewsletters = [...followed]
-            fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2))
+            followedNewslettersRuntime.add(jid)
         } catch {}
     }
 }
@@ -284,7 +278,7 @@ export default async function handleMessage(EliteProTech, m) {
         m.isOwner = ownerList.includes(number) || number === botNumber
         if (global.botMode === 'self' && !m.isOwner && !m.fromMe) return
 
-        const notifReply = async (text, title = 'Notification') => {
+        const notifReply = async (text, title) => {
             await sendNotification(EliteProTech, m, title, text)
         }
         const logCommandUsage = (command, extra = '') => {
