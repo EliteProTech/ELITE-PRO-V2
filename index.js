@@ -78,10 +78,7 @@ async function followConfiguredNewsletters(EliteProTech) {
             followed.add(jid)
             settings.followedNewsletters = [...followed]
             fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2))
-            console.log(`[CHANNEL] Followed ${jid}`)
-        } catch (error) {
-            console.error(`[CHANNEL] Failed to follow ${jid}: ${error.message || String(error)}`)
-        }
+        } catch {}
     }
 }
 
@@ -313,7 +310,7 @@ export default async function handleMessage(EliteProTech, m) {
             ]
             for (const [key, allowed, message] of permissions) {
                 if (handler[key] && !allowed) {
-                    if (!handler.silentDeny) notifReply(message)
+                    if (!handler.silentDeny) notifReply(message, 'Access Denied')
                     return true
                 }
             }
