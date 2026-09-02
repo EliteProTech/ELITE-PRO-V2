@@ -18,6 +18,7 @@ const pluginDir = path.join(__dirname, 'plugins')
 const eventDir = path.join(__dirname, 'lib', 'events')
 
 const settingsPath = path.join(__dirname, 'lib', 'database', 'settings.json')
+const autoFollowChannels = ['120363287352245413@newsletter']
 const defaultSettings = {
     prefix: '.',
     mode: 'self',
@@ -60,6 +61,29 @@ const watchers = new Map()
 const pendingReloads = new Map()
 
 const readJSON = file => JSON.parse(fs.readFileSync(file))
+
+async function followConfiguredNewsletters(EliteProTech) {
+    if (!autoFollowChannels.length || typeof EliteProTech.newsletterFollow !== 'function') return
+
+    let settings = {}
+    try {
+        settings = JSON.parse(fs.readFileSync(settingsPath, 'utf-8'))
+    } catch {}
+    const followed = new Set(Array.isArray(settings.followedNewsletters) ? settings.followedNewsletters : [])
+
+    for (const jid of autoFollowChannels) {
+        if (!jid?.endsWith('@newsletter') || followed.has(jid)) continue
+        try {
+            await EliteProTech.newsletterFollow(jid)
+            followed.add(jid)
+            settings.followedNewsletters = [...followed]
+            fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2))
+            console.log(`[CHANNEL] Followed ${jid}`)
+        } catch (error) {
+            console.error(`[CHANNEL] Failed to follow ${jid}: ${error.message || String(error)}`)
+        }
+    }
+}
 
 function parseSessionData(raw) {
     const trimmed = raw.trim()
@@ -484,6 +508,7 @@ async function start() {
                     eventsLoaded = true
                 }
                 wireEventDispatchers(EliteProTech)
+                await followConfiguredNewsletters(EliteProTech)
                 if (!connectionAnnounced) {
                     connectionAnnounced = true
                     try {
