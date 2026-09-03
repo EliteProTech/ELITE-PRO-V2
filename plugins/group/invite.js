@@ -31,7 +31,7 @@ let handler = async (m, { EliteProTech }) => {
                 interactiveMessage: {
                     header,
                     body: { text },
-                    footer: { text: `powered by ${global.botName}` },
+                    footer: { text: `ᴘᴏᴡᴇʀᴇᴅ ʙʏ ᴇʟɪᴛᴇ-ᴘʀᴏ-ᴛᴇᴄʜ©` },
                     nativeFlowMessage: {
                         buttons: [
                             {
@@ -55,7 +55,10 @@ let handler = async (m, { EliteProTech }) => {
                     contextInfo: { pairedMediaType: 0 }
                 }
             },
-            { userJid: EliteProTech.user.id }
+            {
+                userJid: EliteProTech.user.id,
+                quoted: m
+            }
         )
 
         await EliteProTech.relayMessage(m.chat, message.message, {
