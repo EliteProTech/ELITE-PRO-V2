@@ -5,6 +5,7 @@ import fs from 'fs'
 import axios from 'axios'
 import { unzipSync } from 'fflate'
 import { fileURLToPath } from 'url'
+import { reloadEvents, reloadPlugins } from '../../index.js'
 
 const execFileAsync = promisify(execFile)
 const projectRoot = path.resolve(path.join(path.dirname(fileURLToPath(import.meta.url)), '..', '..'))
@@ -42,6 +43,32 @@ const isGitRepo = () => {
     }
 }
 
+const normalizeChangedFiles = files => files
+    .map(file => String(file).replace(/\\/g, '/').trim())
+    .filter(Boolean)
+
+const reloadRuntimeFiles = async files => {
+    const changed = normalizeChangedFiles(files)
+    const pluginsChanged = changed.some(file => file.startsWith('plugins/'))
+    const eventsChanged = changed.some(file => file.startsWith('lib/events/'))
+
+    if (pluginsChanged) await reloadPlugins()
+    if (eventsChanged) await reloadEvents()
+
+    const restartRequired = changed.some(file =>
+        file === 'index.js' ||
+        file === 'config.js' ||
+        file === 'package.json' ||
+        file === 'package-lock.json' ||
+        file.startsWith('lib/') && !file.startsWith('lib/events/')
+    )
+    const dependenciesChanged = changed.some(file =>
+        file === 'package.json' || file === 'package-lock.json'
+    )
+
+    return { pluginsChanged, eventsChanged, restartRequired, dependenciesChanged }
+}
+
 const updateWithGit = async repo => {
     const { stdout: status } = await execFileAsync(
         'git',
@@ -53,13 +80,34 @@ const updateWithGit = async repo => {
         throw new Error('Local changes detected. Commit or stash them before updating.')
     }
 
+    const { stdout: before } = await execFileAsync(
+        'git',
+        ['-C', projectRoot, 'rev-parse', 'HEAD'],
+        { maxBuffer: 1024 * 1024 }
+    )
+
     const { stdout, stderr } = await execFileAsync(
         'git',
         ['-C', projectRoot, 'pull', '--ff-only', repo.url, branch],
         { maxBuffer: 10 * 1024 * 1024 }
     )
 
-    return (stdout || stderr || 'Already up to date.').trim()
+    const { stdout: after } = await execFileAsync(
+        'git',
+        ['-C', projectRoot, 'rev-parse', 'HEAD'],
+        { maxBuffer: 1024 * 1024 }
+    )
+    const range = `${before.trim()}..${after.trim()}`
+    const { stdout: changed } = await execFileAsync(
+        'git',
+        ['-C', projectRoot, 'diff', '--name-only', range],
+        { maxBuffer: 10 * 1024 * 1024 }
+    )
+
+    return {
+        text: (stdout || stderr || 'Already up to date.').trim(),
+        files: normalizeChangedFiles(changed.split(/\r?\n/))
+    }
 }
 
 const updateWithZip = async repo => {
@@ -79,7 +127,7 @@ const updateWithZip = async repo => {
     }
 
     const root = names[0].split('/')[0] + '/'
-    let updated = 0
+    const changed = []
 
     for (const name of names) {
         if (!name.startsWith(root) || name.endsWith('/')) continue
@@ -93,12 +141,37 @@ const updateWithZip = async repo => {
 
         if (check.startsWith('..') || path.isAbsolute(check)) continue
 
+        const content = Buffer.from(files[name])
+        const current = fs.existsSync(destination) ? fs.readFileSync(destination) : null
+        if (current && Buffer.compare(current, content) === 0) continue
+
         fs.mkdirSync(path.dirname(destination), { recursive: true })
-        fs.writeFileSync(destination, Buffer.from(files[name]))
-        updated++
+        fs.writeFileSync(destination, content)
+        changed.push(relative)
     }
 
-    return `Updated ${updated} file(s) from ${repo.owner}/${repo.name}@${branch}.`
+    return {
+        text: `Updated ${changed.length} file(s) from ${repo.owner}/${repo.name}@${branch}.`,
+        files: changed
+    }
+}
+
+const formatUpdateResult = async result => {
+    const runtime = await reloadRuntimeFiles(result.files)
+    const reloaded = []
+    if (runtime.pluginsChanged) reloaded.push('plugins')
+    if (runtime.eventsChanged) reloaded.push('events')
+
+    const runtimeMessage = reloaded.length
+        ? `Reloaded: *${reloaded.join(' and ')}*.\n`
+        : ''
+    const restartMessage = runtime.dependenciesChanged
+        ? 'Run `npm install`, then restart the bot to load updated dependencies.'
+        : runtime.restartRequired
+        ? 'Restart the bot to load updated core files, helpers, or configuration.'
+        : 'Update is active; no restart is required for these changed files.'
+
+    return `*Update complete*\n\n${result.text}\n\n${runtimeMessage}${restartMessage}`
 }
 
 let handler = async (m) => {
@@ -108,10 +181,7 @@ let handler = async (m) => {
         if (isGitRepo()) {
             try {
                 const result = await updateWithGit(repo)
-
-                return await m.reply(
-                    `*Update complete*\n\n${result}\n\nRestart the bot to apply the updates.`
-                )
+                return await m.reply(await formatUpdateResult(result))
             } catch (error) {
                 const output = `${error.stdout || ''}\n${error.stderr || ''}\n${error.message || ''}`
 
@@ -129,10 +199,7 @@ let handler = async (m) => {
         }
 
         const result = await updateWithZip(repo)
-
-        await m.reply(
-            `*Update complete*\n\n${result}\n\nRestart the bot to apply the updates.`
-        )
+        await m.reply(await formatUpdateResult(result))
     } catch (error) {
         const output =
             error.stderr ||

@@ -1,3 +1,4 @@
+import { getGroupMetadata } from '../../lib/myfunc.js'
 import { getGroupSettings, updateGroupSettings } from '../../lib/groupsettings.js'
 
 const antiLinkModes = new Map([
@@ -12,16 +13,34 @@ const antiLinkModes = new Map([
 
 const onOff = value => ['on', 'off'].includes(value) ? value === 'on' : null
 
-let handler = async (m, { args, text, command }) => {
+let handler = async (m, { EliteProTech, args, text, command }) => {
     const settings = getGroupSettings(m.chat)
 
     if (command === 'groupsettings' || command === 'gsettings') {
+        const metadata = await getGroupMetadata(EliteProTech, m.chat, true)
+        const members = metadata?.participants || []
+        const pending = metadata?.requestParticipants?.length || metadata?.pendingParticipants?.length || 0
+        const status = metadata?.announce ? 'Closed' : 'Open'
+        const muted = metadata?.announce ? 'ON (admins only)' : 'OFF'
+        const infoEdit = metadata?.restrict ? 'Admins only' : 'All members'
+        const memberAdd = metadata?.memberAddMode === false ? 'Admins only' : 'All members'
         return await m.reply(
             `*Group Settings*\n\n` +
-            `Anti-link: *${settings.antiLink}*\n` +
-            `Anti-group-status: *${settings.antiGroupStatus}*\n` +
+            `Title: *${metadata?.subject || 'Unknown'}*\n` +
+            `Members: *${members.length}*\n` +
+            `Mute: *${muted}*\n` +
+            `Status: *${status}*\n` +
+            `Pending requests: *${pending}*\n` +
+            `Edit group info: *${infoEdit}*\n` +
+            `Add members: *${memberAdd}*\n` +
+            `Addressing mode: *${metadata?.addressingMode || 'pn'}*\n\n` +
+            `*Automations*\n` +
             `Welcome: *${settings.welcome ? 'ON' : 'OFF'}*\n` +
-            `Goodbye: *${settings.goodbye ? 'ON' : 'OFF'}*\n\n` +
+            `Goodbye: *${settings.goodbye ? 'ON' : 'OFF'}*\n` +
+            `Anti-link: *${settings.antiLink}*\n` +
+            `Anti-group-status: *${settings.antiGroupStatus}*\n\n` +
+            `*Controls*\n` +
+            `${global.prefix || ''}group open | close\n\n` +
             `Anti-link modes:\n` +
             `${global.prefix || ''}antilink off | delete | warn | deletewarn | warnkick | deletekick | deletewarnkick [warning limit]\n\n` +
             `${global.prefix || ''}antigroupstatus off | delete | warn | warnkick | kick [warning limit]\n\n` +

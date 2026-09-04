@@ -1,5 +1,10 @@
-let handler = async (m, { EliteProTech, command }) => {
-    const closed = command === 'close'
+let handler = async (m, { EliteProTech, args }) => {
+    const choice = args[0]?.toLowerCase()
+    if (!['open', 'close'].includes(choice)) {
+        return await m.reply(`Usage: ${global.prefix || ''}group open | close`)
+    }
+
+    const closed = choice === 'close'
     try {
         await EliteProTech.groupSettingUpdate(m.chat, closed ? 'announcement' : 'not_announcement')
         await m.reply(`Group is now *${closed ? 'closed' : 'open'}*.`)
@@ -8,7 +13,7 @@ let handler = async (m, { EliteProTech, command }) => {
     }
 }
 
-handler.command = ['open', 'close']
+handler.command = ['group']
 handler.group = true
 handler.admin = true
 handler.isBotAdmin = true
