@@ -19,10 +19,12 @@ let handler = async (m, { args, text, command }) => {
         return await m.reply(
             `*Group Settings*\n\n` +
             `Anti-link: *${settings.antiLink}*\n` +
+            `Anti-group-status: *${settings.antiGroupStatus}*\n` +
             `Welcome: *${settings.welcome ? 'ON' : 'OFF'}*\n` +
             `Goodbye: *${settings.goodbye ? 'ON' : 'OFF'}*\n\n` +
             `Anti-link modes:\n` +
-            `${global.prefix || ''}antilink off | delete | warn | deletewarn | warnkick | deletekick | deletewarnkick\n\n` +
+            `${global.prefix || ''}antilink off | delete | warn | deletewarn | warnkick | deletekick | deletewarnkick [warning limit]\n\n` +
+            `${global.prefix || ''}antigroupstatus off | delete | warn | warnkick | kick [warning limit]\n\n` +
             `Welcome/goodbye:\n` +
             `${global.prefix || ''}welcome on|off\n` +
             `${global.prefix || ''}goodbye on|off\n` +
@@ -34,9 +36,26 @@ let handler = async (m, { args, text, command }) => {
 
     if (command === 'antilink') {
         const mode = antiLinkModes.get(args[0]?.toLowerCase())
-        if (!mode) return await m.reply(`Usage: ${global.prefix || ''}antilink off | delete | warn | deletewarn | warnkick | deletekick | deletewarnkick`)
-        updateGroupSettings(m.chat, { antiLink: mode })
-        return await m.reply(`Anti-link mode set to *${mode}*.`)
+        if (!mode) return await m.reply(`Usage: ${global.prefix || ''}antilink off | delete | warn | deletewarn | warnkick | deletekick | deletewarnkick [warning limit]`)
+        const limit = args[1] === undefined ? settings.antiLinkLimit : Number.parseInt(args[1], 10)
+        if (!Number.isInteger(limit) || limit < 1 || limit > 10) return await m.reply('Warning limit must be from 1 to 10.')
+        updateGroupSettings(m.chat, { antiLink: mode, antiLinkLimit: limit, antiLinkUsers: {} })
+        return await m.reply(`Anti-link mode set to *${mode}*${mode.includes('kick') && mode.includes('warn') ? ` with a *${limit}* warning limit` : ''}.`)
+    }
+
+    if (command === 'antigroupstatus' || command === 'antistatus') {
+        const mode = antiLinkModes.get(args[0]?.toLowerCase())
+        if (!mode || !['off', 'delete', 'warn', 'warnkick', 'kick'].includes(mode)) {
+            return await m.reply(`Usage: ${global.prefix || ''}antigroupstatus off | delete | warn | warnkick | kick [warning limit]`)
+        }
+        const limit = args[1] === undefined ? settings.antiGroupStatusLimit : Number.parseInt(args[1], 10)
+        if (!Number.isInteger(limit) || limit < 1 || limit > 10) return await m.reply('Warning limit must be from 1 to 10.')
+        updateGroupSettings(m.chat, {
+            antiGroupStatus: mode,
+            antiGroupStatusLimit: limit,
+            antiGroupStatusUsers: {}
+        })
+        return await m.reply(`Anti-group-status mode set to *${mode}*${mode === 'warnkick' ? ` with a *${limit}* warning limit` : ''}.`)
     }
 
     if (command === 'welcome' || command === 'goodbye') {
@@ -52,7 +71,7 @@ let handler = async (m, { args, text, command }) => {
     await m.reply(`${command === 'setwelcome' ? 'Welcome' : 'Goodbye'} message updated.`)
 }
 
-handler.command = ['antilink', 'welcome', 'goodbye', 'setwelcome', 'setgoodbye', 'groupsettings', 'gsettings']
+handler.command = ['antilink', 'antigroupstatus', 'antistatus', 'welcome', 'goodbye', 'setwelcome', 'setgoodbye', 'groupsettings', 'gsettings']
 handler.group = true
 handler.admin = true
 handler.ownerBypassAdmin = true
