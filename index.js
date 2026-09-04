@@ -153,6 +153,16 @@ export async function initPlugins() {
     pluginStartupComplete = true
 }
 
+export async function reloadPlugins() {
+    const files = new Set(getPluginFiles(pluginDir))
+    for (const file of [...pluginCache.keys()]) {
+        if (!files.has(file)) await unloadPlugin(file)
+    }
+    for (const file of files) {
+        await loadPlugin(file)
+    }
+}
+
 async function loadEventFile(file) {
     try {
         const module = await import(`${pathToFileURL(file).href}?update=${Date.now()}`)
@@ -185,6 +195,16 @@ export async function initEvents() {
     watch(eventDir, loadEventFile, unloadEventFile)
     console.log(chalk.green(`[EVENT] Loaded ${eventCache.size} event(s)`))
     eventStartupComplete = true
+}
+
+export async function reloadEvents() {
+    const files = new Set(getPluginFiles(eventDir))
+    for (const file of [...eventCache.keys()]) {
+        if (!files.has(file)) await unloadEventFile(file)
+    }
+    for (const file of files) {
+        await loadEventFile(file)
+    }
 }
 
 const wiredEventNames = new Set()
@@ -417,6 +437,17 @@ let eventsLoaded = false
 let isConnecting = false
 let connectionAnnounced = false
 
+async function loadRuntime() {
+    if (!pluginsLoaded) {
+        await initPlugins()
+        pluginsLoaded = true
+    }
+    if (!eventsLoaded) {
+        await initEvents()
+        eventsLoaded = true
+    }
+}
+
 const getStatusCode = lastDisconnect => {
     try {
         if (!lastDisconnect?.error) return 0
@@ -444,6 +475,9 @@ async function start() {
     isConnecting = true
 
     try {
+        // Finish loading commands and events before WhatsApp can deliver messages.
+        await loadRuntime()
+
         if (EliteProTech) {
             EliteProTech.ev.removeAllListeners()
             EliteProTech.ws?.close?.()
@@ -514,14 +548,6 @@ async function start() {
                 if (reconnectTimer) {
                     clearTimeout(reconnectTimer)
                     reconnectTimer = null
-                }
-                if (!pluginsLoaded) {
-                    await initPlugins()
-                    pluginsLoaded = true
-                }
-                if (!eventsLoaded) {
-                    await initEvents()
-                    eventsLoaded = true
                 }
                 wireEventDispatchers(EliteProTech)
                 await followConfiguredNewsletters(EliteProTech)
