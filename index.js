@@ -60,6 +60,8 @@ const pluginCache = new Map()
 const eventCache = new Map()
 const watchers = new Map()
 const pendingReloads = new Map()
+let pluginStartupComplete = false
+let eventStartupComplete = false
 
 const readJSON = file => JSON.parse(fs.readFileSync(file))
 
@@ -101,7 +103,8 @@ async function loadPlugin(file) {
         const module = await import(`${pathToFileURL(file).href}?update=${Date.now()}`)
         const handler = module.default
         if (!handler) return
-        if (pluginCache.has(file)) {
+        const wasLoaded = pluginCache.has(file)
+        if (wasLoaded) {
             for (const key of pluginCache.get(file)) plugins.delete(key)
         }
         const relative = path.relative(pluginDir, file)
@@ -124,7 +127,9 @@ async function loadPlugin(file) {
             keys.push(key)
         }
         pluginCache.set(file, keys)
-        console.log(`[PLUGIN] Loaded ${path.relative(pluginDir, file)}`)
+        if (pluginStartupComplete) {
+            console.log(`[PLUGIN] ${wasLoaded ? 'Updated' : 'Added'} ${path.relative(pluginDir, file)}`)
+        }
     } catch (e) {
         console.error(`[PLUGIN] Failed ${file}`)
         console.error(e)
@@ -139,10 +144,13 @@ async function unloadPlugin(file) {
 }
 
 export async function initPlugins() {
-    for (const file of getPluginFiles(pluginDir)) {
+    const files = getPluginFiles(pluginDir)
+    for (const file of files) {
         await loadPlugin(file)
     }
     watch(pluginDir, loadPlugin, unloadPlugin)
+    console.log(chalk.green(`[PLUGIN] Loaded ${pluginCache.size} plugin(s)`))
+    pluginStartupComplete = true
 }
 
 async function loadEventFile(file) {
@@ -150,9 +158,12 @@ async function loadEventFile(file) {
         const module = await import(`${pathToFileURL(file).href}?update=${Date.now()}`)
         const handler = module.default
         if (!handler || !handler.on) return
+        const wasLoaded = eventCache.has(file)
         eventHandlers.set(file, handler)
         eventCache.set(file, true)
-        console.log(`[EVENT] Loaded ${path.relative(eventDir, file)}`)
+        if (eventStartupComplete) {
+            console.log(`[EVENT] ${wasLoaded ? 'Updated' : 'Added'} ${path.relative(eventDir, file)}`)
+        }
     } catch (e) {
         console.error(`[EVENT] Failed ${file}`)
         console.error(e)
@@ -167,10 +178,13 @@ async function unloadEventFile(file) {
 }
 
 export async function initEvents() {
-    for (const file of getPluginFiles(eventDir)) {
+    const files = getPluginFiles(eventDir)
+    for (const file of files) {
         await loadEventFile(file)
     }
     watch(eventDir, loadEventFile, unloadEventFile)
+    console.log(chalk.green(`[EVENT] Loaded ${eventCache.size} event(s)`))
+    eventStartupComplete = true
 }
 
 const wiredEventNames = new Set()
@@ -511,6 +525,7 @@ async function start() {
                 }
                 wireEventDispatchers(EliteProTech)
                 await followConfiguredNewsletters(EliteProTech)
+                console.log(chalk.greenBright(`[CONNECTION] Connected as ${EliteProTech.decodeJid(EliteProTech.user.id)}`))
                 if (!connectionAnnounced) {
                     connectionAnnounced = true
                     try {
@@ -533,6 +548,7 @@ async function start() {
                 } else if (statusCode === DisconnectReason.connectionLost || statusCode === 0) {
                     delay = 8000
                 }
+                console.log(chalk.yellow(`[CONNECTION] Disconnected. Reconnecting in ${delay / 1000}s.`))
                 restartBot(delay)
             }
         })
@@ -552,9 +568,7 @@ const server = http.createServer((req, res) => {
 
 const PORT = process.env.PORT || 3000
 
-server.listen(PORT, () => {
-    console.log(chalk.greenBright(`[SERVER] Listening on port ${PORT}`))
-})
+server.listen(PORT, () => {})
 
 process.on('SIGINT', async () => {
     try {
