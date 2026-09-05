@@ -9,7 +9,6 @@ import { fileURLToPath, pathToFileURL } from 'url'
 import { useMultiFileAuthState, DisconnectReason, Browsers } from '@whiskeysockets/baileys'
 import { smsg, makeWASocket, bind, sendNotification, getGroupMetadata } from './lib/myfunc.js'
 import { suppressSignalLogs } from './lib/filter.js'
-import { getCustomCommand } from './lib/customcommands.js'
 import './config.js'
 
 suppressSignalLogs()
@@ -356,12 +355,7 @@ export default async function handleMessage(EliteProTech, m) {
             const command = args.shift().toLowerCase()
 
             const handler = plugins.get(command)
-            if (!handler) {
-                const response = getCustomCommand(command)
-                if (response === null) return
-                logCommandUsage(command, '(custom command)')
-                return await m.reply(response)
-            }
+            if (!handler) return
 
             const denied = checkAccess(handler)
             if (denied) return
@@ -401,12 +395,7 @@ export default async function handleMessage(EliteProTech, m) {
         const args = body2.split(/\s+/)
         const command = args.shift().toLowerCase()
         const handler = plugins.get(command)
-        if (!handler) {
-            const response = getCustomCommand(command)
-            if (response === null) return
-            logCommandUsage(command, '(custom command)')
-            return await m.reply(response)
-        }
+        if (!handler) return
         const denied = checkAccess(handler)
         if (denied) return
         logCommandUsage(command)
