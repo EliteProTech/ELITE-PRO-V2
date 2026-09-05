@@ -526,7 +526,12 @@ async function start() {
         EliteProTech.ev.on('creds.update', saveCreds)
 
         EliteProTech.ev.on('messages.upsert', async ({ messages, type }) => {
-            if (type !== 'notify' || messages.length === 0) return
+            if (!messages?.length) return
+            for (const raw of messages) {
+                EliteProTech.rememberMessage(raw)
+            }
+
+            if (type !== 'notify') return
             for (const raw of messages) {
                 setImmediate(async () => {
                     try {
