@@ -169,9 +169,10 @@ const formatUpdateResult = async result => {
         ? 'Run `npm install`, then restart the bot to load updated dependencies.'
         : runtime.restartRequired
         ? 'Restart the bot to load updated core files, helpers, or configuration.'
-        : 'Update is active; no restart is required for these changed files.'
+        : ''
 
-    return `*Update complete*\n\n${result.text}\n\n${runtimeMessage}${restartMessage}`
+    const details = [runtimeMessage.trim(), restartMessage].filter(Boolean).join('\n')
+    return `*Update complete*\n\n${result.text}${details ? `\n\n${details}` : ''}`
 }
 
 let handler = async (m) => {

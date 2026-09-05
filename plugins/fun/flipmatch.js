@@ -1,0 +1,20 @@
+import { sendRichHtml } from '../../lib/richhtml.js'
+
+const html = `<style>*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}body{margin:0;background:#07191d;color:#effeff;font-family:Arial,sans-serif}.shell{max-width:560px;margin:auto;padding:13px;background:linear-gradient(135deg,#052d36,#0b182b 58%,#291a36);border-radius:26px;overflow:hidden;box-shadow:0 16px 42px #001015}.hero{padding:15px 16px 14px;border-radius:17px;background:linear-gradient(110deg,#04b8b4,#2277c9 56%,#b83b91);display:flex;justify-content:space-between;align-items:center}.eyebrow{font-size:9px;letter-spacing:2px;font-weight:bold;color:#d8ffff}.title{font-size:25px;font-weight:900;margin-top:5px;text-shadow:0 2px #0002}.moves{text-align:right}.moves b{font-size:27px;display:block}.board{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:14px 3px}.tile{aspect-ratio:1;border:0;border-radius:13px;background:#123942;color:transparent;font-size:28px;box-shadow:inset 0 0 0 2px #3fe4df33,0 5px 0 #04151c;transition:transform .15s,background .18s}.tile:active{transform:translateY(3px);box-shadow:inset 0 0 0 2px #3fe4df66,0 2px 0 #04151c}.tile.open{background:#e8ffff;color:#06313b}.tile.done{background:linear-gradient(145deg,#fcda55,#ee8f35);color:#472000;box-shadow:inset 0 0 0 2px #fff8b7,0 5px 0 #82401c}.bottom{display:flex;gap:9px;align-items:center;padding:0 3px}.status{flex:1;min-height:43px;padding:12px;border-radius:12px;background:#ffffff12;border:1px solid #4ee2d533;color:#cdfcfb;font-size:12px;font-weight:bold}.new{border:0;border-radius:12px;padding:13px 14px;background:#f6c849;color:#412000;font-size:10px;font-weight:900;letter-spacing:1px;box-shadow:0 4px 0 #9f5a19}.new:active{transform:translateY(3px);box-shadow:0 1px 0 #9f5a19}.hint{text-align:center;margin:12px 0 2px;color:#92c9d0;font-size:10px}</style><div class="shell"><div class="hero"><div><div class="eyebrow">ELITE-PRO-V2 • ARCADE</div><div class="title">🃏 Flip Match</div></div><div class="moves"><div class="eyebrow">MOVES</div><b id="moves">0</b></div></div><div class="board" id="board"></div><div class="bottom"><div class="status" id="status">Flip two cards to find a pair.</div><button class="new" id="new">RESET</button></div><div class="hint">Clear all eight pairs in the fewest moves.</div></div><script>const icons=['🍉','🎮','⚡','🚀','🎧','👑','💎','🔥'];const board=document.getElementById('board'),status=document.getElementById('status'),movesEl=document.getElementById('moves');let cards,open=[],moves=0,lock=false,matched=0;function shuffle(a){return a.sort(()=>Math.random()-.5)}function game(){cards=shuffle([...icons,...icons]).map((icon,i)=>({icon,i,done:false}));open=[];moves=0;lock=false;matched=0;movesEl.textContent=0;status.textContent='Flip two cards to find a pair.';draw()}function draw(){board.innerHTML='';cards.forEach((c,i)=>{let b=document.createElement('button');b.className='tile'+(open.includes(i)?' open':'')+(c.done?' done':'');b.textContent=(open.includes(i)||c.done)?c.icon:'✦';b.onclick=()=>pick(i);board.appendChild(b)})}function pick(i){if(lock||cards[i].done||open.includes(i))return;open.push(i);draw();if(open.length<2)return;moves++;movesEl.textContent=moves;let[a,b]=open;if(cards[a].icon===cards[b].icon){cards[a].done=cards[b].done=true;matched+=2;open=[];status.textContent=matched===cards.length?'🏆 Perfect! Cleared in '+moves+' moves.':'✨ Pair found! Keep going.';draw()}else{lock=true;status.textContent='No match. Watch closely!';setTimeout(()=>{open=[];lock=false;status.textContent='Flip two cards to find a pair.';draw()},650)}}document.getElementById('new').onclick=game;game()</script>`
+
+let handler = async (m, { EliteProTech }) => {
+    try {
+        await sendRichHtml(EliteProTech, m.chat, {
+            id: 'elite-flip-match',
+            title: 'ELITE-PRO-V2 • FLIP MATCH',
+            html,
+            source: 'eliteprotech'
+        })
+    } catch (error) {
+        await m.reply(`Unable to send Flip Match: ${error.message || String(error)}`)
+    }
+}
+
+handler.command = ['flipmatch', 'cardmatch']
+
+export default handler
