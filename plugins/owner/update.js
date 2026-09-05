@@ -43,6 +43,17 @@ const isGitRepo = () => {
     }
 }
 
+const getLocalFiles = directory => {
+    if (!fs.existsSync(directory)) return []
+    const files = []
+    for (const item of fs.readdirSync(directory, { withFileTypes: true })) {
+        const full = path.join(directory, item.name)
+        if (item.isDirectory()) files.push(...getLocalFiles(full))
+        else if (item.isFile()) files.push(full)
+    }
+    return files
+}
+
 const normalizeChangedFiles = files => files
     .map(file => String(file).replace(/\\/g, '/').trim())
     .filter(Boolean)
@@ -128,6 +139,12 @@ const updateWithZip = async repo => {
 
     const root = names[0].split('/')[0] + '/'
     const changed = []
+    const remoteFiles = new Set(
+        names
+            .filter(name => name.startsWith(root) && !name.endsWith('/'))
+            .map(name => name.slice(root.length).replace(/\\/g, '/'))
+            .filter(file => file && !shouldSkip(file))
+    )
 
     for (const name of names) {
         if (!name.startsWith(root) || name.endsWith('/')) continue
@@ -150,9 +167,21 @@ const updateWithZip = async repo => {
         changed.push(relative)
     }
 
+    const removed = []
+    for (const relativeDirectory of ['plugins', 'lib/events']) {
+        const directory = path.join(projectRoot, relativeDirectory)
+        for (const file of getLocalFiles(directory)) {
+            if (!file.endsWith('.js')) continue
+            const relative = path.relative(projectRoot, file).replace(/\\/g, '/')
+            if (remoteFiles.has(relative)) continue
+            fs.unlinkSync(file)
+            removed.push(relative)
+        }
+    }
+
     return {
-        text: `Updated ${changed.length} file(s) from ${repo.owner}/${repo.name}@${branch}.`,
-        files: changed
+        text: `Updated ${changed.length} file(s)${removed.length ? ` and removed ${removed.length} stale file(s)` : ''} from ${repo.owner}/${repo.name}@${branch}.`,
+        files: [...changed, ...removed]
     }
 }
 
