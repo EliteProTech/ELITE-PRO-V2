@@ -2,6 +2,7 @@ import readline from 'readline'
 import fs from 'fs'
 import path from 'path'
 import http from 'http'
+import { spawn } from 'child_process'
 import pino from 'pino'
 import { Boom } from '@hapi/boom'
 import chalk from 'chalk'
@@ -425,6 +426,9 @@ let pluginsLoaded = false
 let eventsLoaded = false
 let isConnecting = false
 let connectionAnnounced = false
+const isWorker = process.argv.includes('--child')
+let supervisorWorker = null
+let supervisorStopping = false
 
 async function loadRuntime() {
     if (!pluginsLoaded) {
@@ -587,17 +591,51 @@ const server = http.createServer((req, res) => {
 
 const PORT = process.env.PORT || 3000
 
-server.listen(PORT, () => {})
+if (isWorker) server.listen(PORT, () => {})
 
-process.on('SIGINT', async () => {
+export function requestRestart() {
+    if (typeof process.send === 'function') {
+        process.send('restart')
+        return
+    }
+    process.exit(0)
+}
+
+const shutdown = async () => {
+    if (!isWorker) {
+        supervisorStopping = true
+        supervisorWorker?.kill('SIGTERM')
+        process.exit(0)
+    }
     try {
         if (reconnectTimer) clearTimeout(reconnectTimer)
         EliteProTech?.ev.removeAllListeners()
         EliteProTech?.ws?.close?.()
     } catch {}
     process.exit(0)
-})
+}
+
+process.on('SIGINT', shutdown)
+process.on('SIGTERM', shutdown)
+
+function startSupervisor() {
+    if (supervisorStopping) return
+    supervisorWorker = spawn(process.execPath, [process.argv[1], '--child'], {
+        stdio: ['inherit', 'inherit', 'inherit', 'ipc'],
+        env: process.env
+    })
+
+    supervisorWorker.on('message', message => {
+        if (message === 'restart') supervisorWorker?.kill('SIGTERM')
+    })
+
+    supervisorWorker.on('exit', () => {
+        supervisorWorker = null
+        if (!supervisorStopping) setTimeout(startSupervisor, 500)
+    })
+}
 
 if (import.meta.url === pathToFileURL(process.argv[1] || '').href) {
-    start()
+    if (isWorker) start()
+    else startSupervisor()
 }

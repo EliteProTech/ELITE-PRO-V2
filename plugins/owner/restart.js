@@ -1,3 +1,5 @@
+import { requestRestart } from '../../index.js'
+
 let handler = async (m, { EliteProTech }) => {
     await m.reply('Restarting bot...')
     setTimeout(() => {
@@ -5,7 +7,7 @@ let handler = async (m, { EliteProTech }) => {
             EliteProTech.ev.removeAllListeners()
             EliteProTech.ws?.close?.()
         } catch {}
-        process.exit(0)
+        requestRestart()
     }, 750)
 }
 
