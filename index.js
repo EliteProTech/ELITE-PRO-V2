@@ -464,7 +464,6 @@ async function start() {
     isConnecting = true
 
     try {
-        // Finish loading commands and events before WhatsApp can deliver messages.
         await loadRuntime()
 
         if (EliteProTech) {
