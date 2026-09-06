@@ -34,10 +34,10 @@ let handler = async (m) => {
     }
 
     let text = `╭━━━〔 *${global.botName}* 〕━━━╮\n`
-    text += `┃ 👤 *User:* ${pushName}\n`
-    text += `┃ ⚙️ *Mode:* ${global.botMode}\n`
-    text += `┃ 🔖 *Prefix:* ${global.prefix || 'none'}\n`
-    text += `┃ ⏱️ *Uptime:* ${formatUptime(process.uptime())}\n`
+    text += `┣❍ *ᴜꜱᴇʀ:* ${pushName}\n`
+    text += `┣❍ *ᴍᴏᴅᴇ:* ${global.botMode}\n`
+    text += `┣❍ *ᴘʀᴇғɪx:* ${global.prefix || 'none'}\n`
+    text += `┣❍ *ᴜᴘᴛɪᴍᴇ:* ${formatUptime(process.uptime())}\n`
     text += `╰━━━━━━━━━━━━━━━━━━━━╯\n\n`
 
     for (const category of Object.keys(byCategory).sort()) {
