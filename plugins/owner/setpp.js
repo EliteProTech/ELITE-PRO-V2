@@ -1,8 +1,16 @@
 import sharp from 'sharp'
 
-let handler = async (m, { EliteProTech }) => {
+let handler = async (m, { EliteProTech, args, command }) => {
+    const requested = args[0]?.toLowerCase()
+    const fullCommand = command === 'setfullpp' || command === 'setfullprofilepicture'
+    const mode = requested || (fullCommand ? 'full' : 'square')
+
+    if (!['square', 'full'].includes(mode)) {
+        return await m.reply(`Usage: ${global.prefix || ''}setpp square\n${global.prefix || ''}setfullpp full`)
+    }
+
     if (!m.quoted) {
-        return await m.reply(`Reply to an image.\n\nUsage: ${global.prefix || ''}setpp`)
+        return await m.reply(`Reply to an image.\n\nUsage: ${global.prefix || ''}setpp square\n${global.prefix || ''}setfullpp full`)
     }
 
     const mime = m.quoted.mimetype || m.quoted.msg?.mimetype || ''
@@ -14,9 +22,13 @@ let handler = async (m, { EliteProTech }) => {
         await EliteProTech.sendMessage(m.chat, { react: { text: '🖼️', key: m.key } })
 
         const media = await m.quoted.download()
-        const image = await sharp(media)
-            .rotate()
-            .resize(720, 720, { fit: 'inside', withoutEnlargement: true })
+        const processor = sharp(media).rotate()
+        if (mode === 'square') {
+            processor.resize(720, 720, { fit: 'cover', position: 'centre' })
+        } else {
+            processor.resize(720, 720, { fit: 'inside', withoutEnlargement: true })
+        }
+        const image = await processor
             .jpeg({ quality: 90 })
             .toBuffer()
 
@@ -35,7 +47,7 @@ let handler = async (m, { EliteProTech }) => {
         })
 
         await EliteProTech.sendMessage(m.chat, { react: { text: '✅', key: m.key } })
-        await m.reply('Full profile picture updated successfully.')
+        await m.reply(`${mode === 'square' ? 'Square' : 'Full'} profile picture updated successfully.`)
     } catch (error) {
         await EliteProTech.sendMessage(m.chat, { react: { text: '❌', key: m.key } }).catch(() => {})
         await m.reply(`Failed to update profile picture: ${error.message || String(error)}`)

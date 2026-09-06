@@ -195,17 +195,33 @@ const formatUpdateResult = async result => {
         ? `Reloaded: *${reloaded.join(' and ')}*.\n`
         : ''
     const details = [runtimeMessage.trim()].filter(Boolean).join('\n')
-    return `*Update complete*\n\n${result.text}${details ? `\n\n${details}` : ''}`
+    return {
+        text: `*Update complete*\n\n${result.text}${details ? `\n\n${details}` : ''}`,
+        restartRequired: runtime.restartRequired
+    }
 }
 
-let handler = async (m) => {
+const restartAfterUpdate = EliteProTech => {
+    setTimeout(() => {
+        try {
+            EliteProTech.ev.removeAllListeners()
+            EliteProTech.ws?.close?.()
+        } catch {}
+        process.exit(0)
+    }, 1000)
+}
+
+let handler = async (m, { EliteProTech }) => {
     try {
         const repo = getRepo()
 
         if (isGitRepo()) {
             try {
                 const result = await updateWithGit(repo)
-                return await m.reply(await formatUpdateResult(result))
+                const update = await formatUpdateResult(result)
+                await m.reply(update.text)
+                if (update.restartRequired) restartAfterUpdate(EliteProTech)
+                return
             } catch (error) {
                 const output = `${error.stdout || ''}\n${error.stderr || ''}\n${error.message || ''}`
 
@@ -223,7 +239,9 @@ let handler = async (m) => {
         }
 
         const result = await updateWithZip(repo)
-        await m.reply(await formatUpdateResult(result))
+        const update = await formatUpdateResult(result)
+        await m.reply(update.text)
+        if (update.restartRequired) restartAfterUpdate(EliteProTech)
     } catch (error) {
         const output =
             error.stderr ||

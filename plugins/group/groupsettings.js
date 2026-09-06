@@ -32,8 +32,7 @@ let handler = async (m, { EliteProTech, args, text, command }) => {
             `Status: *${status}*\n` +
             `Pending requests: *${pending}*\n` +
             `Edit group info: *${infoEdit}*\n` +
-            `Add members: *${memberAdd}*\n` +
-            `Addressing mode: *${metadata?.addressingMode || 'pn'}*\n\n` +
+            `Add members: *${memberAdd}*\n\n` +
             `*Automations*\n` +
             `Welcome: *${settings.welcome ? 'ON' : 'OFF'}*\n` +
             `Goodbye: *${settings.goodbye ? 'ON' : 'OFF'}*\n` +
