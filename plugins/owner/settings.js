@@ -1,6 +1,9 @@
+import { getAntiCallSettings } from '../../lib/anticall.js'
+
 let handler = async (m) => {
     const prefix = global.prefix || 'none'
     const status = value => value ? 'ON' : 'OFF'
+    const antiCall = getAntiCallSettings()
 
     await m.reply(
         `*Bot Settings*\n\n` +
@@ -11,7 +14,8 @@ let handler = async (m) => {
         `Auto-read: *${status(global.autoRead)}*\n` +
         `Auto-recording: *${status(global.autoRecording)}*\n` +
         `Auto-typing: *${status(global.autoTyping)}*\n` +
-        `Auto-record/type: *${status(global.autoRecordType)}*`
+        `Auto-record/type: *${status(global.autoRecordType)}*\n` +
+        `Anti-call: *${antiCall.action}* (${antiCall.scope})`
     )
 }
 
