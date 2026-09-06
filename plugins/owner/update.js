@@ -5,7 +5,7 @@ import fs from 'fs'
 import axios from 'axios'
 import { unzipSync } from 'fflate'
 import { fileURLToPath } from 'url'
-import { reloadEvents, reloadPlugins } from '../../index.js'
+import { reloadEvents, reloadPlugins, requestRestart } from '../../index.js'
 
 const execFileAsync = promisify(execFile)
 const projectRoot = path.resolve(path.join(path.dirname(fileURLToPath(import.meta.url)), '..', '..'))
@@ -207,7 +207,7 @@ const restartAfterUpdate = EliteProTech => {
             EliteProTech.ev.removeAllListeners()
             EliteProTech.ws?.close?.()
         } catch {}
-        process.exit(0)
+        requestRestart()
     }, 1000)
 }
 
