@@ -1,5 +1,16 @@
 import { plugins } from '../../index.js'
 
+const formatUptime = seconds => {
+    const total = Math.floor(seconds)
+    const days = Math.floor(total / 86400)
+    const hours = Math.floor((total % 86400) / 3600)
+    const minutes = Math.floor((total % 3600) / 60)
+    const remaining = total % 60
+    return [days && `${days}d`, hours && `${hours}h`, minutes && `${minutes}m`, `${remaining}s`]
+        .filter(Boolean)
+        .join(' ')
+}
+
 let handler = async (m) => {
     const byCategory = {}
     const seen = new Set()
@@ -22,23 +33,26 @@ let handler = async (m) => {
         if (commands.length) byCategory[category].push(...commands)
     }
 
-    let text = `*${global.botName} — Menu*\n`
-    text += `Hello, *${pushName}*\n`
-    text += `Prefix: ${global.prefix || 'none'} | Mode: ${global.botMode}\n\n`
+    let text = `╭━━━〔 *${global.botName}* 〕━━━╮\n`
+    text += `┃ 👤 *User:* ${pushName}\n`
+    text += `┃ ⚙️ *Mode:* ${global.botMode}\n`
+    text += `┃ 🔖 *Prefix:* ${global.prefix || 'none'}\n`
+    text += `┃ ⏱️ *Uptime:* ${formatUptime(process.uptime())}\n`
+    text += `╰━━━━━━━━━━━━━━━━━━━━╯\n\n`
 
     for (const category of Object.keys(byCategory).sort()) {
-        text += `*${category}*\n`
+        text += `╭─〔 *${category.toUpperCase()}* 〕\n`
 
         const commands = [...new Set(byCategory[category])].sort()
 
-        for (let index = 0; index < commands.length; index += 2) {
-            text += `➤ ${commands.slice(index, index + 2).join('   |   ')}\n`
+        for (const command of commands) {
+            text += `│ ✦ ${command}\n`
         }
 
-        text += '\n'
+        text += `╰──────────────\n\n`
     }
 
-    await m.reply(text.trim())
+    await m.reply(`${text.trim()}\n\n> Powered by EliteProTech`)
 }
 
 handler.command = ['menu', 'help']
