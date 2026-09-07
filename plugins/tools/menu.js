@@ -52,7 +52,7 @@ let handler = async (m) => {
         text += `╰──────────────\n\n`
     }
 
-    await m.reply(`${text.trim()}\nᴘᴏᴡᴇʀᴇᴅ ʙʏ ᴇʟɪᴛᴇ-ᴘʀᴏ-ᴛᴇᴄʜ`)
+    await m.reply(`${text.trim()}\n> ᴘᴏᴡᴇʀᴇᴅ ʙʏ ᴇʟɪᴛᴇ-ᴘʀᴏ-ᴛᴇᴄʜ`)
 }
 
 handler.command = ['menu', 'help']
