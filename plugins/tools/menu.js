@@ -1,4 +1,8 @@
 import { plugins } from '../../index.js'
+import { readFileSync } from 'fs'
+import { fileURLToPath } from 'url'
+
+const eliteProPicPath = fileURLToPath(new URL('../../lib/database/elitepropic.jpg', import.meta.url))
 
 const formatUptime = seconds => {
     const total = Math.floor(seconds)
@@ -11,7 +15,7 @@ const formatUptime = seconds => {
         .join(' ')
 }
 
-let handler = async (m) => {
+let handler = async (m, { EliteProTech }) => {
     const byCategory = {}
     const seen = new Set()
     const pushName = String(m.pushName || 'User').trim().replace(/[*_`~]/g, '') || 'User'
@@ -52,7 +56,10 @@ let handler = async (m) => {
         text += `╰──────────────\n\n`
     }
 
-    await m.reply(`${text.trim()}\n> ᴘᴏᴡᴇʀᴇᴅ ʙʏ ᴇʟɪᴛᴇ-ᴘʀᴏ-ᴛᴇᴄʜ`)
+    await EliteProTech.sendMessage(m.chat, {
+        image: readFileSync(eliteProPicPath),
+        caption: `${text.trim()}\n> ᴘᴏᴡᴇʀᴇᴅ ʙʏ ᴇʟɪᴛᴇ-ᴘʀᴏ-ᴛᴇᴄʜ`
+    }, { quoted: m })
 }
 
 handler.command = ['menu', 'help']
