@@ -1,6 +1,5 @@
 import { writeFileSync } from 'fs'
 import { fileURLToPath } from 'url'
-import sharp from 'sharp'
 
 const eliteProPicPath = fileURLToPath(new URL('../../lib/elitepropic.jpg', import.meta.url))
 
@@ -15,13 +14,8 @@ let handler = async (m, { EliteProTech }) => {
     try {
         await EliteProTech.sendMessage(m.chat, { react: { text: '🖼️', key: m.key } })
         const media = await m.quoted.download()
-        const image = await sharp(media)
-            .rotate()
-            .resize(1280, 1280, { fit: 'inside', withoutEnlargement: true })
-            .jpeg({ quality: 90 })
-            .toBuffer()
 
-        writeFileSync(eliteProPicPath, image)
+        writeFileSync(eliteProPicPath, media)
         await EliteProTech.sendMessage(m.chat, { react: { text: '✅', key: m.key } })
         await m.reply('Bot menu image updated successfully.')
     } catch (error) {
