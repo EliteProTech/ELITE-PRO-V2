@@ -516,7 +516,7 @@ async function start() {
         bind(EliteProTech)
 
         if (!state.creds.registered) {
-            console.log('Enter the phone number with country code, for example: 234xxxxxxxxxx')
+            console.log('Enter your number, for example: 234xxxxxxxxxx')
             const number = (await question('Sending Code to: ')).replace(/\D/g, '')
             if (!number || number.length < 7) {
                 rl?.close()
