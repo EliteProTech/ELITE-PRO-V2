@@ -54,6 +54,14 @@ const getLocalFiles = directory => {
     return files
 }
 
+const removeEmptyDirectories = directory => {
+    if (!fs.existsSync(directory)) return
+    for (const item of fs.readdirSync(directory, { withFileTypes: true })) {
+        if (item.isDirectory()) removeEmptyDirectories(path.join(directory, item.name))
+    }
+    if (fs.readdirSync(directory).length === 0) fs.rmdirSync(directory)
+}
+
 const normalizeChangedFiles = files => files
     .map(file => String(file).replace(/\\/g, '/').trim())
     .filter(Boolean)
@@ -169,19 +177,19 @@ const updateWithZip = async repo => {
     }
 
     const removed = []
-    for (const relativeDirectory of ['plugins', 'lib/events']) {
+    for (const relativeDirectory of ['plugins', 'lib']) {
         const directory = path.join(projectRoot, relativeDirectory)
         for (const file of getLocalFiles(directory)) {
-            if (!file.endsWith('.js')) continue
             const relative = path.relative(projectRoot, file).replace(/\\/g, '/')
             if (remoteFiles.has(relative)) continue
             fs.unlinkSync(file)
             removed.push(relative)
         }
+        removeEmptyDirectories(directory)
     }
 
     return {
-        text: `Updated ${changed.length} file(s)${removed.length ? ` and removed ${removed.length} stale file(s)` : ''} from ${repo.owner}/${repo.name}@${branch}.`,
+        text: `Updated ${changed.length} file(s)${removed.length ? ` and removed ${removed.length} stale plugin/lib file(s)` : ''} from ${repo.owner}/${repo.name}@${branch}.`,
         files: [...changed, ...removed]
     }
 }
