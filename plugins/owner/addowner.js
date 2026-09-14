@@ -17,9 +17,10 @@ function writeOwners(owners) {
 async function extractOwner(m, EliteProTech, args) {
     const originalJid = m.mentionedJid?.[0] || m.quoted?.sender
     if (!originalJid) {
-        const value = args.find(arg => !arg.startsWith('@'))
+        const value = String(args.find(arg => !arg.startsWith('@')) || '').trim()
+        if (value.endsWith('@lid')) return { id: value }
         const digits = value?.replace(/[^0-9]/g, '')
-        return digits ? { number: digits, legacyLidNumber: null } : null
+        return digits ? { id: digits } : null
     }
 
     let jid = originalJid
@@ -29,31 +30,31 @@ async function extractOwner(m, EliteProTech, args) {
         jid = participant?.phoneNumber || jid
     }
     if (jid.endsWith('@lid')) jid = await EliteProTech.resolveLidToJid(jid)
-    if (!jid || jid.endsWith('@lid')) return null
+    if (!jid) return null
+    if (jid.endsWith('@lid')) return { id: originalJid }
 
     return {
-        number: jid.split('@')[0].replace(/\D/g, ''),
-        legacyLidNumber: originalJid.endsWith('@lid') ? originalJid.split('@')[0] : null
+        id: jid.split('@')[0].replace(/\D/g, '')
     }
 }
 
 let handler = async (m, { EliteProTech, args }) => {
     const target = await extractOwner(m, EliteProTech, args)
-    if (!target?.number) {
-        return await m.reply(`Provide a number, mention a user, or reply to their message.\nUsage: ${global.prefix || ''}addowner 234xxxxxxxxxx`)
+    if (!target?.id) {
+        return await m.reply(`Provide a number or LID, mention a user, or reply to their message.\nUsage: ${global.prefix || ''}addowner 234xxxxxxxxxx`)
     }
-    const { number, legacyLidNumber } = target
+    const { id } = target
     const botNumber = EliteProTech.decodeJid(EliteProTech.user.id).split('@')[0]
-    if (number === botNumber) {
+    if (id === botNumber) {
         return await m.reply('That number is already the primary owner.')
     }
     const owners = readOwners()
-    if (owners.includes(number)) {
-        return await m.reply(`${number} is already an owner.`)
+    if (owners.includes(id)) {
+        return await m.reply(`${id} is already an owner.`)
     }
-    writeOwners([...new Set([...owners.filter(owner => owner !== legacyLidNumber), number])])
+    writeOwners([...new Set([...owners, id])])
 
-    await m.reply(`Added ${number} as an owner.`)
+    await m.reply(`Added ${id} as an owner.`)
 }
 
 handler.command = ['addowner']

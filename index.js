@@ -308,9 +308,11 @@ export default async function handleMessage(EliteProTech, m) {
         m.isButtonResponse = isButtonResponse
 
         const ownerList = readJSON('./database/owner.json')
-        const number = m.sender.split('@')[0]
+        const senderJid = EliteProTech.decodeJid(m.sender || '')
+        const senderLid = m.senderLid ? EliteProTech.decodeJid(m.senderLid) : null
+        const number = senderJid.split('@')[0]
         const botNumber = EliteProTech.decodeJid(EliteProTech.user.id).split('@')[0]
-        m.isOwner = ownerList.includes(number) || number === botNumber
+        m.isOwner = ownerList.includes(senderJid) || ownerList.includes(senderLid) || ownerList.includes(number) || number === botNumber
         if (global.botMode === 'self' && !m.isOwner && !m.fromMe) return
 
         const notifReply = async (text, title) => {
@@ -451,9 +453,10 @@ async function loadRuntime() {
 const getStatusCode = lastDisconnect => {
     try {
         if (!lastDisconnect?.error) return 0
-        return Boom.isBoom(lastDisconnect.error)
+        const statusCode = Boom.isBoom(lastDisconnect.error)
             ? lastDisconnect.error.output.statusCode
-            : lastDisconnect.error?.output?.statusCode || 0
+            : lastDisconnect.error?.output?.statusCode || lastDisconnect.error?.statusCode || lastDisconnect.error?.data?.statusCode || 0
+        return Number(statusCode) || 0
     } catch {
         return 0
     }
@@ -569,7 +572,12 @@ async function start() {
 
         EliteProTech.ev.on('connection.update', async ({ connection, lastDisconnect }) => {
             const statusCode = getStatusCode(lastDisconnect)
-            const errorMessage = lastDisconnect?.error?.message || ''
+            const errorMessage = [
+                lastDisconnect?.error?.message,
+                lastDisconnect?.error?.data?.message,
+                lastDisconnect?.error?.data?.reason,
+                lastDisconnect?.error?.output?.payload?.message
+            ].filter(Boolean).join(' ')
 
             if (connection === 'open') {
                 isConnecting = false
@@ -639,7 +647,7 @@ const isLoggedOutDisconnect = (statusCode, errorMessage = '') => {
     const message = String(errorMessage).toLowerCase()
     return statusCode === DisconnectReason.loggedOut ||
         statusCode === 401 ||
-        /logged.?out|device.?removed|unauthorized|not.authorized/.test(message)
+        /logged.?out|device.?removed|unauthorized|not.authorized|invalid.*session|bad.*mac/.test(message)
 }
 
 const shutdown = async () => {
