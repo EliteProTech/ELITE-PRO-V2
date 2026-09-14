@@ -62,22 +62,23 @@ const reloadRuntimeFiles = async files => {
     const changed = normalizeChangedFiles(files)
     const pluginsChanged = changed.some(file => file.startsWith('plugins/'))
     const eventsChanged = changed.some(file => file.startsWith('lib/events/'))
+    const librariesChanged = changed.filter(file => file.startsWith('lib/') && !file.startsWith('lib/events/'))
 
     if (pluginsChanged) await reloadPlugins()
     if (eventsChanged) await reloadEvents()
+    for (const file of librariesChanged) console.log(`[LIB] Updated ${file}. Restart required to apply changes.`)
 
     const restartRequired = changed.some(file =>
         file === 'index.js' ||
         file === 'config.js' ||
         file === 'package.json' ||
-        file === 'package-lock.json' ||
-        file.startsWith('lib/') && !file.startsWith('lib/events/')
+        file === 'package-lock.json'
     )
     const dependenciesChanged = changed.some(file =>
         file === 'package.json' || file === 'package-lock.json'
     )
 
-    return { pluginsChanged, eventsChanged, restartRequired, dependenciesChanged }
+    return { pluginsChanged, eventsChanged, librariesChanged, restartRequired, dependenciesChanged }
 }
 
 const updateWithGit = async repo => {
