@@ -42,7 +42,7 @@ let handler = async (m, { EliteProTech, text }) => {
         const buffer = await target.download()
         const ext = extFromMime(target.mimetype)
         const webpBuffer = await toWebp(buffer, ext, { isVideo })
-        const finalSticker = addStickerExif(webpBuffer, { packname, author })
+        const finalSticker = await addStickerExif(webpBuffer, { packname, author })
 
         await EliteProTech.sendMessage(m.chat, {
             sticker: finalSticker

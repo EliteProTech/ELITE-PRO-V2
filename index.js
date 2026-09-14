@@ -7,7 +7,7 @@ import pino from 'pino'
 import { Boom } from '@hapi/boom'
 import chalk from 'chalk'
 import { fileURLToPath, pathToFileURL } from 'url'
-import { useMultiFileAuthState, DisconnectReason, Browsers } from '@whiskeysockets/baileys'
+import { useMultiFileAuthState, DisconnectReason, Browsers, fetchLatestBaileysVersion } from '@whiskeysockets/baileys'
 import { smsg, makeWASocket, bind, sendNotification, getGroupMetadata } from './lib/myfunc.js'
 import { suppressSignalLogs } from './lib/filter.js'
 import './config.js'
@@ -413,12 +413,19 @@ export default async function handleMessage(EliteProTech, m) {
     }
 }
 
-const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-})
+let rl = null
 
-const question = text => new Promise(resolve => rl.question(text, resolve))
+const question = text => {
+    if (!rl) {
+        rl = readline.createInterface({
+            input: process.stdin,
+            output: process.stdout
+        })
+    }
+    return new Promise(resolve => rl.question(text, resolve))
+}
+
+const delay = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds))
 
 let EliteProTech
 let reconnectTimer = null
@@ -488,11 +495,18 @@ async function start() {
         }
 
         const { state, saveCreds } = await useMultiFileAuthState('./session')
+        let version
+        try {
+            const latest = await fetchLatestBaileysVersion()
+            version = latest.version
+        } catch (error) {
+        }
 
         EliteProTech = makeWASocket({
             auth: state,
             browser: Browsers.ubuntu('Chrome'),
             logger: pino({ level: 'silent' }),
+            ...(version ? { version } : {}),
             printQRInTerminal: false,
             markOnlineOnConnect: false,
             syncFullHistory: false,
@@ -502,16 +516,33 @@ async function start() {
         bind(EliteProTech)
 
         if (!state.creds.registered) {
-            console.log('Enter the phone number example: 234x');
-            const number = await question('Sending Code to : ');
+            console.log('Enter the phone number with country code, for example: 234xxxxxxxxxx')
+            const number = (await question('Sending Code to: ')).replace(/\D/g, '')
+            if (!number || number.length < 7) {
+                rl?.close()
+                rl = null
+                throw new Error('Enter a valid phone number with country code.')
+            }
             try {
-                const code = await EliteProTech.requestPairingCode(number);
-                console.log(`PAIRING CODE: ${code}`);
+                let code
+                let error
+                for (let attempt = 0; attempt < 2; attempt++) {
+                    try {
+                        await delay(attempt ? 2500 : 1500)
+                        code = await EliteProTech.requestPairingCode(number)
+                        if (code) break
+                    } catch (requestError) {
+                        error = requestError
+                    }
+                }
+                if (!code) throw error || new Error('WhatsApp did not return a pairing code. Try again.')
+                console.log(`PAIRING CODE: ${code}`)
             } catch (err) {
-                console.error('Failed to send pairing code:', err.message);
-                process.exit(1);
+                console.error('Failed to send pairing code:', err.message)
+                process.exit(1)
             } finally {
-                rl.close();
+                rl?.close()
+                rl = null
             }
         }
 
@@ -564,7 +595,10 @@ async function start() {
 
             if (connection === 'close') {
                 isConnecting = false
-                if (statusCode === DisconnectReason.loggedOut) return
+                if (isLoggedOutDisconnect(statusCode, errorMessage)) {
+                    console.log(chalk.redBright('[CONNECTION] Device logged out. Delete the session folder, then pair the bot again.'))
+                    return
+                }
                 let delay = 5000
                 if (errorMessage.includes('Stream Errored')) {
                     delay = 15000
@@ -599,6 +633,13 @@ export function requestRestart() {
         return
     }
     process.exit(0)
+}
+
+const isLoggedOutDisconnect = (statusCode, errorMessage = '') => {
+    const message = String(errorMessage).toLowerCase()
+    return statusCode === DisconnectReason.loggedOut ||
+        statusCode === 401 ||
+        /logged.?out|device.?removed|unauthorized|not.authorized/.test(message)
 }
 
 const shutdown = async () => {
