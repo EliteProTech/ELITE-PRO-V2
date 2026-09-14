@@ -2,7 +2,7 @@ import { writeFileSync } from 'fs'
 import { fileURLToPath } from 'url'
 import sharp from 'sharp'
 
-const eliteProPicPath = fileURLToPath(new URL('../../lib/database/elitepropic.jpg', import.meta.url))
+const eliteProPicPath = fileURLToPath(new URL('../../lib/elitepropic.jpg', import.meta.url))
 
 let handler = async (m, { EliteProTech }) => {
     if (!m.quoted) return await m.reply('Reply to the image you want to use for the bot menu.')
