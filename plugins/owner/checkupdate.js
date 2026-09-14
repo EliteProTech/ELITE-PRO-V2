@@ -79,7 +79,7 @@ let handler = async (m) => {
             `Remote changed: *${changed.length}*\n` +
             `Local-only: *${localOnly.length}*\n\n` +
             `${preview}${extra}\n\n` +
-            `+ will be added, ~ will be overwritten by update, - is local-only and is not deleted by update.`
+            `+ will be added, ~ will be overwritten, and stale files under plugins or lib will be removed by update.`
         )
     } catch (error) {
         await m.reply(`Update check failed: ${error.message || String(error)}`)
