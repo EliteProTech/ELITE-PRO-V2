@@ -57,11 +57,11 @@ const fetchUrl = async input => {
             maxRedirects: 0,
             timeout: 30000,
             maxContentLength: MAX_RESPONSE_BYTES,
-            validateStatus: status => status >= 200 && status < 400,
+            validateStatus: status => status >= 200 && status < 600,
             headers: { 'User-Agent': `${global.botName || 'EliteProTech'} Fetch` }
         })
 
-        if (response.status >= 300) {
+        if (response.status >= 300 && response.status < 400) {
             const location = response.headers.location
             if (!location) throw new Error(`Redirect ${response.status} has no destination.`)
             url = await validateUrl(new URL(location, url).href)
@@ -99,8 +99,7 @@ let handler = async (m, { text, EliteProTech }) => {
         if (result.contentType.startsWith('image/')) {
             return await EliteProTech.sendMessage(m.chat, {
                 image: result.body,
-                mimetype: result.contentType,
-                caption: `*Fetched image:* ${result.url}`
+                mimetype: result.contentType
             }, { quoted: m })
         }
 
@@ -108,8 +107,7 @@ let handler = async (m, { text, EliteProTech }) => {
             return await EliteProTech.sendMessage(m.chat, {
                 video: result.body,
                 mimetype: result.contentType,
-                fileName,
-                caption: `*Fetched video:* ${result.url}`
+                fileName
             }, { quoted: m })
         }
 
@@ -130,8 +128,7 @@ let handler = async (m, { text, EliteProTech }) => {
             return await EliteProTech.sendMessage(m.chat, {
                 document: result.body,
                 mimetype: result.contentType || 'application/octet-stream',
-                fileName,
-                caption: `*Fetched file:* ${result.url}`
+                fileName
             }, { quoted: m })
         }
 
@@ -141,15 +138,13 @@ let handler = async (m, { text, EliteProTech }) => {
             try { output = JSON.stringify(JSON.parse(output), null, 2) } catch {}
         }
 
-        const header = `*Fetched:* ${result.url}\n*Type:* ${result.contentType}\n\n`
-        if (Buffer.byteLength(header + output) <= 60000) {
-            await m.reply(header + output)
+        if (Buffer.byteLength(output) <= 60000) {
+            await m.reply(output)
         } else {
             await EliteProTech.sendMessage(m.chat, {
                 document: Buffer.from(output),
                 mimetype: result.contentType.includes('json') ? 'application/json' : 'text/plain',
-                fileName: fileName.includes('.') ? fileName : 'fetch-response.txt',
-                caption: `${header}Response sent as a file because it is too long.`
+                fileName: fileName.includes('.') ? fileName : 'fetch-response.txt'
             }, { quoted: m })
         }
     } catch (error) {
