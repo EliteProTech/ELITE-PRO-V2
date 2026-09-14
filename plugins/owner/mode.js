@@ -1,7 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 
-const SETTINGS_PATH = path.join(process.cwd(), 'lib', 'database', 'settings.json')
+const SETTINGS_PATH = path.join(process.cwd(), 'database', 'settings.json')
 
 function readSettings() {
     try {

@@ -12,7 +12,7 @@ function shouldSkip(file) {
         normalized.startsWith('session/') ||
         normalized.startsWith('node_modules/') ||
         normalized.startsWith('.git/') ||
-        normalized.startsWith('lib/database/') ||
+        normalized.startsWith('database/') ||
         normalized.startsWith('tmp/')
 }
 

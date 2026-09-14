@@ -2,7 +2,7 @@ import { plugins } from '../../index.js'
 import { readFileSync } from 'fs'
 import { fileURLToPath } from 'url'
 
-const eliteProPicPath = fileURLToPath(new URL('../../lib/database/elitepropic.jpg', import.meta.url))
+const eliteProPicPath = fileURLToPath(new URL('../../lib/elitepropic.jpg', import.meta.url))
 
 const formatUptime = seconds => {
     const total = Math.floor(seconds)

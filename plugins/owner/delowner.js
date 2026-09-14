@@ -2,7 +2,7 @@ import fs from 'fs'
 import path from 'path'
 import { getGroupMetadata } from '../../lib/myfunc.js'
 
-const OWNER_DB_PATH = path.join(process.cwd(), 'lib', 'database', 'owner.json')
+const OWNER_DB_PATH = path.join(process.cwd(), 'database', 'owner.json')
 
 function readOwners() {
     try {

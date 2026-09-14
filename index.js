@@ -18,7 +18,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const pluginDir = path.join(__dirname, 'plugins')
 const eventDir = path.join(__dirname, 'lib', 'events')
 
-const settingsPath = path.join(__dirname, 'lib', 'database', 'settings.json')
+const settingsPath = path.join(__dirname, 'database', 'settings.json')
 export const NEWSLETTER_IDS = ['120363287352245413@newsletter']
 const defaultSettings = {
     prefix: '.',
@@ -307,7 +307,7 @@ export default async function handleMessage(EliteProTech, m) {
         m.text = body
         m.isButtonResponse = isButtonResponse
 
-        const ownerList = readJSON('./lib/database/owner.json')
+        const ownerList = readJSON('./database/owner.json')
         const number = m.sender.split('@')[0]
         const botNumber = EliteProTech.decodeJid(EliteProTech.user.id).split('@')[0]
         m.isOwner = ownerList.includes(number) || number === botNumber
