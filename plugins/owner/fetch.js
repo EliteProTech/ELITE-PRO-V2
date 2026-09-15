@@ -52,14 +52,20 @@ const fetchUrl = async input => {
     let url = await validateUrl(normalizeUrl(input))
 
     for (let redirects = 0; redirects <= MAX_REDIRECTS; redirects++) {
-        const response = await axios.get(url.href, {
-            responseType: 'arraybuffer',
-            maxRedirects: 0,
-            timeout: 30000,
-            maxContentLength: MAX_RESPONSE_BYTES,
-            validateStatus: status => status >= 200 && status < 600,
-            headers: { 'User-Agent': `${global.botName || 'EliteProTech'} Fetch` }
-        })
+        let response
+        try {
+            response = await axios.get(url.href, {
+                responseType: 'arraybuffer',
+                maxRedirects: 0,
+                timeout: 30000,
+                maxContentLength: MAX_RESPONSE_BYTES,
+                validateStatus: () => true,
+                headers: { 'User-Agent': `${global.botName || 'EliteProTech'} Fetch` }
+            })
+        } catch (error) {
+            if (error.response) response = error.response
+            else throw error
+        }
 
         if (response.status >= 300 && response.status < 400) {
             const location = response.headers.location

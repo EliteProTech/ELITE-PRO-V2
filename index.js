@@ -4,7 +4,6 @@ import path from 'path'
 import http from 'http'
 import { spawn } from 'child_process'
 import pino from 'pino'
-import { Boom } from '@hapi/boom'
 import chalk from 'chalk'
 import { fileURLToPath, pathToFileURL } from 'url'
 import { useMultiFileAuthState, DisconnectReason, Browsers, fetchLatestBaileysVersion } from '@whiskeysockets/baileys'
@@ -435,6 +434,7 @@ let pluginsLoaded = false
 let eventsLoaded = false
 let isConnecting = false
 let connectionAnnounced = false
+let logoutDetected = false
 const isWorker = process.argv.includes('--child')
 let supervisorWorker = null
 let supervisorStopping = false
@@ -452,28 +452,51 @@ async function loadRuntime() {
 
 const getStatusCode = lastDisconnect => {
     try {
-        if (!lastDisconnect?.error) return 0
-        const statusCode = Boom.isBoom(lastDisconnect.error)
-            ? lastDisconnect.error.output.statusCode
-            : lastDisconnect.error?.output?.statusCode || lastDisconnect.error?.statusCode || lastDisconnect.error?.data?.statusCode || 0
+        const error = lastDisconnect?.error
+        if (!error) return 0
+        const statusCode = error.output?.statusCode ??
+            error.statusCode ??
+            error.data?.statusCode ??
+            error.data?.output?.statusCode ??
+            error.cause?.output?.statusCode ??
+            error.cause?.statusCode ??
+            error.cause?.data?.statusCode
         return Number(statusCode) || 0
     } catch {
         return 0
     }
 }
 
+function disableReconnectForLogout() {
+    if (logoutDetected) return
+    logoutDetected = true
+    if (reconnectTimer) {
+        clearTimeout(reconnectTimer)
+        reconnectTimer = null
+    }
+    try {
+        EliteProTech?.ev.removeAllListeners()
+        EliteProTech?.ws?.close?.()
+    } catch {}
+    EliteProTech = null
+    console.log(chalk.redBright('[CONNECTION] Device logged out. Delete the session folder, then pair the bot again.'))
+}
+
 function restartBot(delay = 5000) {
+    if (logoutDetected) return
     if (reconnectTimer) {
         clearTimeout(reconnectTimer)
         reconnectTimer = null
     }
     reconnectTimer = setTimeout(() => {
         reconnectTimer = null
+        if (logoutDetected) return
         start()
     }, delay)
 }
 
 async function start() {
+    if (logoutDetected) return
     if (isConnecting) return
     isConnecting = true
 
@@ -549,7 +572,10 @@ async function start() {
             }
         }
 
-        EliteProTech.ev.on('creds.update', saveCreds)
+        EliteProTech.ev.on('creds.update', async update => {
+            await saveCreds(update)
+            if (update?.registered === false) disableReconnectForLogout()
+        })
 
         EliteProTech.ev.on('messages.upsert', async ({ messages, type }) => {
             if (!messages?.length) return
@@ -576,7 +602,9 @@ async function start() {
                 lastDisconnect?.error?.message,
                 lastDisconnect?.error?.data?.message,
                 lastDisconnect?.error?.data?.reason,
-                lastDisconnect?.error?.output?.payload?.message
+                lastDisconnect?.error?.output?.payload?.message,
+                lastDisconnect?.error?.cause?.message,
+                lastDisconnect?.error?.cause?.data?.message
             ].filter(Boolean).join(' ')
 
             if (connection === 'open') {
@@ -604,9 +632,10 @@ async function start() {
             if (connection === 'close') {
                 isConnecting = false
                 if (isLoggedOutDisconnect(statusCode, errorMessage)) {
-                    console.log(chalk.redBright('[CONNECTION] Device logged out. Delete the session folder, then pair the bot again.'))
+                    disableReconnectForLogout()
                     return
                 }
+                if (logoutDetected) return
                 let delay = 5000
                 if (errorMessage.includes('Stream Errored')) {
                     delay = 15000
@@ -645,9 +674,9 @@ export function requestRestart() {
 
 const isLoggedOutDisconnect = (statusCode, errorMessage = '') => {
     const message = String(errorMessage).toLowerCase()
-    return statusCode === DisconnectReason.loggedOut ||
-        statusCode === 401 ||
-        /logged.?out|device.?removed|unauthorized|not.authorized|invalid.*session|bad.*mac/.test(message)
+    return Number(statusCode) === Number(DisconnectReason.loggedOut) ||
+        Number(statusCode) === 401 ||
+        /logged.?out|device.?removed|unauthorized|not.?authorized|invalid.*session|bad.*mac|device.?logout|session.*logout/.test(message)
 }
 
 const shutdown = async () => {
