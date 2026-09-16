@@ -58,11 +58,8 @@ let handler = async (m, { EliteProTech }) => {
     }
 
     try {
-        await EliteProTech.sendMessage(m.chat, { react: { text: '⏳', key: m.key } })
         await resendQuoted(EliteProTech, m.quoted, m.chat, m)
-        await EliteProTech.sendMessage(m.chat, { react: { text: '✅', key: m.key } })
     } catch (error) {
-        await EliteProTech.sendMessage(m.chat, { react: { text: '❌', key: m.key } }).catch(() => {})
         await m.reply(`Unable to process that message: ${error.message || String(error)}`)
     }
 }

@@ -37,7 +37,7 @@ let handler = async (m, { command, EliteProTech }) => {
             : 'Reply to a view-once image, video, audio, document, or sticker.')
     }
 
-    const isViewOnceCommand = command === 'vv' || command === 'viewonce'
+    const isViewOnceCommand = command === 'vv' || command === 'vvdm' || command === 'viewonce'
     if (isViewOnceCommand && !MEDIA_TYPES.has(m.quoted.mtype)) {
         return await m.reply('Reply to a view-once image, video, audio, document, or sticker.')
     }
@@ -46,7 +46,7 @@ let handler = async (m, { command, EliteProTech }) => {
         await EliteProTech.sendMessage(m.chat, { react: { text: command === 'save' ? '💾' : '⏳', key: m.key } })
 
         if (MEDIA_TYPES.has(m.quoted.mtype)) {
-            await sendMedia(EliteProTech, m.quoted, command === 'save' ? m.sender : m.chat, m)
+            await sendMedia(EliteProTech, m.quoted, command === 'save' || command === 'vvdm' ? m.sender : m.chat, m)
         } else if (command === 'save' && m.quoted.text) {
             await EliteProTech.sendMessage(m.sender, { text: m.quoted.text }, { quoted: m })
         } else {
@@ -60,7 +60,7 @@ let handler = async (m, { command, EliteProTech }) => {
     }
 }
 
-handler.command = ['save', 'vv', 'viewonce']
+handler.command = ['save', 'vv', 'vvdm', 'viewonce']
 handler.owner = true
 
 export default handler
