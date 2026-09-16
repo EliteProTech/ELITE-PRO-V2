@@ -24,6 +24,8 @@ const defaultSettings = {
     mode: 'self',
     autoViewStatus: false,
     autoLikeStatus: false,
+    autoLikeStatusEmojis: ['💚'],
+    antiViewOnceScope: null,
     autoRead: false,
     autoRecording: false,
     autoTyping: false,
@@ -35,6 +37,10 @@ try {
     global.botMode = saved.mode === 'public' ? 'public' : defaultSettings.mode
     global.autoViewStatus = typeof saved.autoViewStatus === 'boolean' ? saved.autoViewStatus : defaultSettings.autoViewStatus
     global.autoLikeStatus = typeof saved.autoLikeStatus === 'boolean' ? saved.autoLikeStatus : defaultSettings.autoLikeStatus
+    global.autoLikeStatusEmojis = Array.isArray(saved.autoLikeStatusEmojis) && saved.autoLikeStatusEmojis.length
+        ? saved.autoLikeStatusEmojis.map(String).filter(Boolean)
+        : defaultSettings.autoLikeStatusEmojis
+    global.antiViewOnceScope = ['dm', 'group', 'all'].includes(saved.antiViewOnceScope) ? saved.antiViewOnceScope : null
     global.autoRead = typeof saved.autoRead === 'boolean' ? saved.autoRead : defaultSettings.autoRead
     global.autoRecording = typeof saved.autoRecording === 'boolean' ? saved.autoRecording : defaultSettings.autoRecording
     global.autoTyping = typeof saved.autoTyping === 'boolean' ? saved.autoTyping : defaultSettings.autoTyping
@@ -45,6 +51,8 @@ try {
         botMode: defaultSettings.mode,
         autoViewStatus: defaultSettings.autoViewStatus,
         autoLikeStatus: defaultSettings.autoLikeStatus,
+        autoLikeStatusEmojis: defaultSettings.autoLikeStatusEmojis,
+        antiViewOnceScope: defaultSettings.antiViewOnceScope,
         autoRead: defaultSettings.autoRead,
         autoRecording: defaultSettings.autoRecording,
         autoTyping: defaultSettings.autoTyping,

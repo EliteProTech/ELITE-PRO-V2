@@ -10,7 +10,8 @@ let handler = async (m) => {
         `Prefix: *${prefix}*\n` +
         `Mode: *${global.botMode}*\n\n` +
         `Auto-view status: *${status(global.autoViewStatus)}*\n` +
-        `Auto-like status: *${status(global.autoLikeStatus)}*\n` +
+        `Auto-like status: *${status(global.autoLikeStatus)}* (${global.autoLikeStatusEmojis?.join(' ') || '💚'})\n` +
+        `Anti-view-once: *${global.antiViewOnceScope || 'OFF'}*\n` +
         `Auto-read: *${status(global.autoRead)}*\n` +
         `Auto-recording: *${status(global.autoRecording)}*\n` +
         `Auto-typing: *${status(global.autoTyping)}*\n` +
