@@ -1,4 +1,4 @@
-import { generateWAMessageFromContent, prepareWAMessageMedia } from '@whiskeysockets/baileys'
+import { generateWAMessageFromContent, prepareWAMessageMedia, proto } from '@whiskeysockets/baileys'
 
 const COLORS = {
     green: 0xFF25D366,
@@ -42,7 +42,13 @@ let handler = async (m, { text, EliteProTech }) => {
                 ? { image: media, caption }
                 : quoted.mtype === 'videoMessage'
                     ? { video: media, caption }
-                    : { audio: media, mimetype: quoted.mimetype || 'audio/mpeg', ptt: Boolean(quoted.msg?.ptt) }
+                    : {
+                        audio: media,
+                        mimetype: quoted.mimetype || 'audio/mpeg',
+                        ptt: Boolean(quoted.msg?.ptt),
+                        seconds: quoted.msg?.seconds,
+                        waveform: quoted.msg?.waveform
+                    }
 
             const prepared = await prepareWAMessageMedia(mediaContent, { upload: EliteProTech.waUploadToServer })
             const mediaMessage = quoted.mtype === 'imageMessage'
@@ -66,7 +72,7 @@ let handler = async (m, { text, EliteProTech }) => {
             }
         }
 
-        const generated = generateWAMessageFromContent(m.chat, message, {
+        const generated = generateWAMessageFromContent(m.chat, proto.Message.fromObject(message), {
             userJid: EliteProTech.user.id,
             quoted: m
         })
