@@ -1,90 +1,163 @@
-import { generateWAMessageFromContent, prepareWAMessageMedia, proto } from '@whiskeysockets/baileys'
+/*
+plugins esm swgc
+*/
 
-const COLORS = {
-    green: 0xFF25D366,
-    red: 0xFFFF0000,
-    blue: 0xFF0000FF,
-    yellow: 0xFFFFFF00,
-    purple: 0xFF800080,
-    black: 0xFF000000,
-    white: 0xFFFFFFFF,
-    orange: 0xFFFFA500
+import { generateWAMessageContent } from "baileys";
+
+const hex_to_argb = (hex) => {
+    if (!hex) return undefined;
+    hex = hex.replace('#', '');
+    if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
+    const r = parseInt(hex.slice(0, 2), 16);
+    const g = parseInt(hex.slice(2, 4), 16);
+    const b = parseInt(hex.slice(4, 6), 16);
+    return ((0xFF << 24) | (r << 16) | (g << 8) | b) >>> 0;
+};
+
+async function groupStatus(conn, jid, content) {
+    const { backgroundColor, font } = content;
+    delete content.backgroundColor;
+    delete content.font;
+
+    const inside = await generateWAMessageContent(content, {
+        upload: conn.waUploadToServer
+    });
+
+    const messageType = Object.keys(inside)[0];
+
+    const groupStatusContext = {
+        featureEligibilities: {
+            canReceiveMultiReact: true
+        },
+        statusSourceType: 4,
+        statusAttributions: [
+            { type: 10 }
+        ],
+        isGroupStatus: true,
+        statusAudienceMetadata: {
+            audienceType: 1
+        }
+    };
+
+    inside[messageType].contextInfo = {
+        ...(inside[messageType].contextInfo || {}),
+        ...groupStatusContext
+    };
+
+    if (messageType === 'extendedTextMessage') {
+        if (backgroundColor) inside[messageType].backgroundArgb = backgroundColor;
+        inside[messageType].textArgb = 4294967295;
+        inside[messageType].font = font || 5;
+        inside[messageType].previewType = 0;
+        inside[messageType].inviteLinkGroupTypeV2 = 0;
+    }
+
+    await conn.relayMessage(jid, inside, {});
+    return true;
 }
 
-const MEDIA_TYPES = new Set(['imageMessage', 'videoMessage', 'audioMessage'])
+let handler = async (m, { conn, usedPrefix, command, text }) => {
+    const quoted = m.quoted ? m.quoted : m;
+    const mime = (quoted.msg || quoted).mimetype || quoted.mtype || "";
 
-function parseTextAndColor(input = '') {
-    const [text, colorName] = input.split(/,(.+)/).map(value => value?.trim())
-    return { text, color: COLORS[colorName?.toLowerCase()] }
-}
+    let caption = m.quoted
+        ? (m.quoted.text || m.quoted.caption || "")
+        : "";
 
-let handler = async (m, { text, EliteProTech }) => {
-    const quoted = m.quoted
-    const hasMedia = MEDIA_TYPES.has(quoted?.mtype)
-    const { text: statusText, color } = parseTextAndColor(text)
+    let targetJid = m.chat;
 
-    if (!hasMedia && !statusText) {
-        return await m.reply(
-            `Send text or reply to an image, video, or audio.\n\n` +
-            `Examples:\n${global.prefix || ''}groupstatus Hello everyone\n` +
-            `${global.prefix || ''}groupstatus Hello everyone,blue\n` +
-            `Colors: ${Object.keys(COLORS).join(', ')}`
-        )
+    if (text) {
+        let input = text.trim();
+
+        if (input.endsWith('@g.us')) {
+            targetJid = input;
+        } else {
+            caption = input;
+        }
+    }
+
+    if (!targetJid.endsWith('@g.us')) {
+        return m.reply(
+            `❌ This command must include a group ID when used in a private chat.\n\n` +
+            `Format:\n` +
+            `• ${usedPrefix + command} → upload to this group\n` +
+            `• ${usedPrefix + command} 1234xxx@g.us → upload to another group`
+        );
+    }
+
+    if (targetJid !== m.chat) {
+        const groupMetadata = await conn.groupMetadata(targetJid).catch(() => null);
+
+        if (!groupMetadata) {
+            return m.reply(
+                '❌ The bot is not a member of that group or the group ID is invalid!'
+            );
+        }
     }
 
     try {
-        let message
+        let payload = {};
 
-        if (hasMedia) {
-            const media = await quoted.download()
-            const caption = quoted.text || quoted.caption || ''
-            const mediaContent = quoted.mtype === 'imageMessage'
-                ? { image: media, caption }
-                : quoted.mtype === 'videoMessage'
-                    ? { video: media, caption }
-                    : {
-                        audio: media,
-                        mimetype: quoted.mimetype || 'audio/mpeg',
-                        ptt: Boolean(quoted.msg?.ptt),
-                        seconds: quoted.msg?.seconds,
-                        waveform: quoted.msg?.waveform
-                    }
+        if (/image|imageMessage/.test(mime)) {
+            const buffer = await quoted.download();
 
-            const prepared = await prepareWAMessageMedia(mediaContent, { upload: EliteProTech.waUploadToServer })
-            const mediaMessage = quoted.mtype === 'imageMessage'
-                ? { imageMessage: prepared.imageMessage }
-                : quoted.mtype === 'videoMessage'
-                    ? { videoMessage: prepared.videoMessage }
-                    : { audioMessage: prepared.audioMessage }
+            payload = {
+                image: buffer,
+                caption
+            };
 
-            message = { groupStatusMessageV2: { message: mediaMessage } }
+        } else if (/video|videoMessage/.test(mime)) {
+            const buffer = await quoted.download();
+
+            payload = {
+                video: buffer,
+                caption
+            };
+
+        } else if (/audio|audioMessage/.test(mime)) {
+            const buffer = await quoted.download();
+
+            payload = {
+                audio: buffer,
+                mimetype: "audio/mp4"
+            };
+
+        } else if (caption) {
+            payload = {
+                text: caption,
+                backgroundColor: hex_to_argb('#1B5E20'),
+                font: 5
+            };
+
         } else {
-            message = {
-                groupStatusMessageV2: {
-                    message: {
-                        extendedTextMessage: {
-                            text: statusText,
-                            backgroundArgb: color ?? (0xFF000000 + Math.floor(Math.random() * 0xFFFFFF)),
-                            font: 2
-                        }
-                    }
-                }
-            }
+            return await m.reply(
+                `❌ Reply to media or type the text you want to use as a status.\n\n` +
+                `Format:\n` +
+                `• ${usedPrefix + command} → upload text to this group\n` +
+                `• ${usedPrefix + command} 1234xxx@g.us → upload to another group`
+            );
         }
 
-        const generated = generateWAMessageFromContent(m.chat, proto.Message.fromObject(message), {
-            userJid: EliteProTech.user.id,
-            quoted: m
-        })
-        await EliteProTech.relayMessage(m.chat, generated.message, { messageId: generated.key.id })
-        await EliteProTech.sendMessage(m.chat, { react: { text: '✅', key: m.key } })
-    } catch (error) {
-        await m.reply(`Unable to send group status: ${error.message || String(error)}`)
+        await groupStatus(conn, targetJid, payload);
+
+        if (targetJid === m.chat) {
+            await m.reply(`✅ Successfully uploaded to the group status.`);
+        } else {
+            await m.reply(`✅ Successfully uploaded to ${targetJid}`);
+        }
+
+    } catch (err) {
+        console.error(err);
+
+        await m.reply(
+            '❌ An error occurred: ' + (err.message || err)
+        );
     }
-}
+};
 
-handler.command = ['groupstatus', 'gcstatus']
-handler.group = true
-handler.owner = true
+handler.help = ['swgc'];
+handler.tags = ['owner'];
+handler.command = ['swgc'];
+handler.rowner = true;
 
-export default handler
+export default handler;
