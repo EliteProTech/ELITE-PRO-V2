@@ -8,7 +8,18 @@ const COLORS = {
     purple: 0xFF800080,
     black: 0xFF000000,
     white: 0xFFFFFFFF,
-    orange: 0xFFFFA500
+    orange: 0xFFFFA500,
+    pink: 0xFFFF69B4,
+    cyan: 0xFF00FFFF,
+    lime: 0xFF00FF00,
+    gold: 0xFFFFD700,
+    brown: 0xFFA52A2A,
+    gray: 0xFF808080,
+    silver: 0xFFC0C0C0,
+    navy: 0xFF000080,
+    teal: 0xFF008080,
+    violet: 0xFFEE82EE,
+    indigo: 0xFF4B0082
 }
 
 const MEDIA_TYPES = new Set([
@@ -20,13 +31,14 @@ const MEDIA_TYPES = new Set([
 const hexToArgb = hex => {
     if (!hex) return undefined
 
-    hex = hex.replace('#', '')
+    hex = hex.replace('#', '').trim()
 
     if (hex.length === 3) {
-        hex = hex
-            .split('')
-            .map(c => c + c)
-            .join('')
+        hex = hex.split('').map(c => c + c).join('')
+    }
+
+    if (!/^[0-9a-fA-F]{6}$/.test(hex)) {
+        return undefined
     }
 
     const r = parseInt(hex.slice(0, 2), 16)
@@ -42,13 +54,21 @@ const hexToArgb = hex => {
 }
 
 const parseTextAndColor = input => {
-    const [text, colorName] = String(input || '')
-        .split(/,(.+)/)
-        .map(value => value?.trim())
+    const value = String(input || '').trim()
+
+    const parts = value.split(',')
+
+    const text = parts.shift()?.trim() || ''
+
+    const colorName = parts.join(',').trim().toLowerCase()
+
+    const color =
+        COLORS[colorName] ??
+        hexToArgb(colorName)
 
     return {
         text,
-        color: COLORS[colorName?.toLowerCase()]
+        color
     }
 }
 
@@ -132,8 +152,12 @@ let handler = async (m, { text, EliteProTech }) => {
             `Send text or reply to an image, video, or audio.\n\n` +
             `Examples:\n` +
             `${global.prefix || ''}groupstatus Hello everyone\n` +
-            `${global.prefix || ''}groupstatus Hello everyone,blue\n\n` +
-            `Colors: ${Object.keys(COLORS).join(', ')}`
+            `${global.prefix || ''}groupstatus Hello everyone,blue\n` +
+            `${global.prefix || ''}groupstatus Hello everyone,#FF1493\n\n` +
+            `Colors:\n` +
+            `${Object.keys(COLORS).join(', ')}\n\n` +
+            `You can also use HEX colors:\n` +
+            `#FF1493`
         )
     }
 
@@ -161,7 +185,9 @@ let handler = async (m, { text, EliteProTech }) => {
                         caption
                     }
                 )
-            } else if (quoted.mtype === 'videoMessage') {
+            }
+
+            else if (quoted.mtype === 'videoMessage') {
                 await groupStatus(
                     EliteProTech,
                     m.chat,
@@ -170,7 +196,9 @@ let handler = async (m, { text, EliteProTech }) => {
                         caption
                     }
                 )
-            } else if (quoted.mtype === 'audioMessage') {
+            }
+
+            else if (quoted.mtype === 'audioMessage') {
                 await groupStatus(
                     EliteProTech,
                     m.chat,
@@ -185,33 +213,25 @@ let handler = async (m, { text, EliteProTech }) => {
                     }
                 )
             }
-        } else {
-            await groupStatus(
-                EliteProTech,
-                m.chat,
-                {
-                    text: statusText,
-                    backgroundColor:
-                        color ??
-                        (
-                            0xFF000000 +
-                            Math.floor(
-                                Math.random() *
-                                0xFFFFFF
-                            )
-                        ),
-                    font: 5
-                }
-            )
+
+            return
         }
 
-        await EliteProTech.sendMessage(
+        await groupStatus(
+            EliteProTech,
             m.chat,
             {
-                react: {
-                    text: '✅',
-                    key: m.key
-                }
+                text: statusText,
+                backgroundColor:
+                    color ??
+                    (
+                        0xFF000000 +
+                        Math.floor(
+                            Math.random() *
+                            0xFFFFFF
+                        )
+                    ),
+                font: 5
             }
         )
     } catch (error) {
