@@ -448,6 +448,9 @@ let eventsLoaded = false
 let isConnecting = false
 let connectionAnnounced = false
 let logoutDetected = false
+const processedMessageKeys = new Map()
+const MESSAGE_DEDUP_TTL = 5 * 60 * 1000
+const MESSAGE_DEDUP_LIMIT = 10_000
 const isWorker = process.argv.includes('--child')
 let supervisorWorker = null
 let supervisorStopping = false
@@ -461,6 +464,32 @@ async function loadRuntime() {
         await initEvents()
         eventsLoaded = true
     }
+}
+
+function isDuplicateMessage(message) {
+    const key = message?.key
+    if (!key?.id) return false
+
+    const cacheKey = [
+        key.remoteJidAlt || key.remoteJid || '',
+        key.participantAlt || key.participant || '',
+        key.fromMe ? 'from-me' : 'from-user',
+        key.id
+    ].join(':')
+    const now = Date.now()
+    const seenAt = processedMessageKeys.get(cacheKey)
+    if (seenAt && now - seenAt < MESSAGE_DEDUP_TTL) return true
+
+    processedMessageKeys.set(cacheKey, now)
+    while (processedMessageKeys.size > MESSAGE_DEDUP_LIMIT) {
+        processedMessageKeys.delete(processedMessageKeys.keys().next().value)
+    }
+
+    for (const [storedKey, storedAt] of processedMessageKeys) {
+        if (now - storedAt < MESSAGE_DEDUP_TTL) break
+        processedMessageKeys.delete(storedKey)
+    }
+    return false
 }
 
 const getStatusCode = lastDisconnect => {
@@ -477,6 +506,34 @@ const getStatusCode = lastDisconnect => {
         return Number(statusCode) || 0
     } catch {
         return 0
+    }
+}
+
+const getDisconnectDiagnostic = lastDisconnect => {
+    const error = lastDisconnect?.error
+    if (!error) return { statusCode: 0, errorMessage: 'No disconnect error was provided.' }
+
+    return {
+        statusCode: getStatusCode(lastDisconnect) || null,
+        errorName: error.name || null,
+        errorMessage: error.message || null,
+        errorCode: error.code,
+        errorOutput: error.output
+            ? {
+                statusCode: error.output.statusCode,
+                payload: error.output.payload
+            }
+            : undefined,
+        errorData: error.data,
+        errorCause: error.cause
+            ? {
+                name: error.cause.name,
+                message: error.cause.message,
+                code: error.cause.code,
+                statusCode: error.cause.output?.statusCode || error.cause.statusCode,
+                data: error.cause.data
+            }
+            : undefined
     }
 }
 
@@ -598,6 +655,7 @@ async function start() {
 
             if (type !== 'notify') return
             for (const raw of messages) {
+                if (isDuplicateMessage(raw)) continue
                 setImmediate(async () => {
                     try {
                         let m = raw
@@ -655,6 +713,11 @@ async function start() {
                 } else if (statusCode === DisconnectReason.connectionLost || statusCode === 0) {
                     delay = 8000
                 }
+                if (statusCode === 515) {
+                    restartBot(delay)
+                    return
+                }
+                console.log('[CONNECTION] Disconnect diagnostic:', getDisconnectDiagnostic(lastDisconnect))
                 console.log(chalk.yellow(`[CONNECTION] Disconnected. Reconnecting in ${delay / 1000}s.`))
                 restartBot(delay)
             }
