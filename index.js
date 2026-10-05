@@ -25,6 +25,8 @@ const defaultSettings = {
     autoViewStatus: false,
     autoLikeStatus: false,
     autoLikeStatusEmojis: ['💚'],
+    autoReact: false,
+    autoReactEmojis: ['💚'],
     antiViewOnceGlobal: false,
     antiViewOnceGroups: {},
     autoRead: false,
@@ -41,6 +43,10 @@ try {
     global.autoLikeStatusEmojis = Array.isArray(saved.autoLikeStatusEmojis) && saved.autoLikeStatusEmojis.length
         ? saved.autoLikeStatusEmojis.map(String).filter(Boolean)
         : defaultSettings.autoLikeStatusEmojis
+    global.autoReact = typeof saved.autoReact === 'boolean' ? saved.autoReact : defaultSettings.autoReact
+    global.autoReactEmojis = Array.isArray(saved.autoReactEmojis) && saved.autoReactEmojis.length
+        ? saved.autoReactEmojis.map(String).filter(Boolean)
+        : defaultSettings.autoReactEmojis
     global.antiViewOnceGlobal = saved.antiViewOnceGlobal === true
     global.antiViewOnceGroups = saved.antiViewOnceGroups && typeof saved.antiViewOnceGroups === 'object'
         ? saved.antiViewOnceGroups
@@ -56,6 +62,8 @@ try {
         autoViewStatus: defaultSettings.autoViewStatus,
         autoLikeStatus: defaultSettings.autoLikeStatus,
         autoLikeStatusEmojis: defaultSettings.autoLikeStatusEmojis,
+        autoReact: defaultSettings.autoReact,
+        autoReactEmojis: defaultSettings.autoReactEmojis,
         antiViewOnceGlobal: defaultSettings.antiViewOnceGlobal,
         antiViewOnceGroups: defaultSettings.antiViewOnceGroups,
         autoRead: defaultSettings.autoRead,
@@ -738,7 +746,18 @@ const server = http.createServer((req, res) => {
 
 const PORT = process.env.PORT || 3000
 
-if (isWorker) server.listen(PORT, () => {})
+function startHealthServer() {
+    server.once('error', error => {
+        if (error.code === 'EADDRINUSE') {
+            setTimeout(startHealthServer, 1000)
+            return
+        }
+        console.error('[SERVER] Health server error:', error.message || error)
+    })
+    server.listen(PORT, () => {})
+}
+
+if (isWorker) startHealthServer()
 
 export function requestRestart() {
     if (typeof process.send === 'function') {
