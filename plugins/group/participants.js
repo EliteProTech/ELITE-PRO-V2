@@ -1,4 +1,5 @@
 import { getGroupMetadata } from '../../lib/myfunc.js'
+import { runGroupActions } from '../../lib/groupactions.js'
 
 async function targetsFromMessage(EliteProTech, m, args) {
     const metadata = await getGroupMetadata(EliteProTech, m.chat, true)
@@ -41,7 +42,7 @@ async function targetsFromMessage(EliteProTech, m, args) {
         await addTarget(m.quoted.sender)
     }
 
-    for (const value of args) {
+    for (const value of args.flatMap(value => String(value).split(','))) {
         const number = value.replace(/\D/g, '')
         if (number) {
             await addTarget(`${number}@s.whatsapp.net`)
@@ -159,6 +160,17 @@ let handler = async (m, { EliteProTech, args, command }) => {
         return await m.reply('Invalid group participant action.')
     }
 
+    const requiresConfirmation = (command === 'add' && targets.length > 5) ||
+        (['kick', 'promote', 'demote'].includes(command) && targets.length > 10)
+    const confirmed = args.some(arg => String(arg).toLowerCase() === 'confirm')
+    if (requiresConfirmation && !confirmed) {
+        return await m.reply(
+            `This will ${action} *${targets.length}* members one at a time with a safety delay.\n\n` +
+            `Add *confirm* at the end to continue, for example:\n` +
+            `${global.prefix || ''}${command} 2348000000000,2348111111111 confirm`
+        )
+    }
+
     const mentions = await getMentionTargets(
         EliteProTech,
         m.chat,
@@ -166,15 +178,14 @@ let handler = async (m, { EliteProTech, args, command }) => {
     )
 
     try {
-        const result = await EliteProTech.groupParticipantsUpdate(
-            m.chat,
-            targets,
-            action
-        )
+        const result = await runGroupActions(targets, action, async target => {
+            const response = await EliteProTech.groupParticipantsUpdate(m.chat, [target], action)
+            const failed = response.find(item => item.status && item.status !== '200')
+            if (failed) throw new Error(`WhatsApp returned status ${failed.status}.`)
+            return response
+        })
 
-        const failed = result.filter(
-            item => item.status && item.status !== '200'
-        )
+        const failed = result.filter(item => !item.ok)
 
         if (!failed.length) {
             return await replySuccess(

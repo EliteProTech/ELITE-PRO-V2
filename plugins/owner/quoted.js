@@ -6,6 +6,48 @@ const MEDIA_TYPES = new Set([
     'stickerMessage'
 ])
 
+function getNestedQuotedMessage(EliteProTech, storedMessage) {
+    if (!storedMessage || typeof storedMessage !== 'object') return null
+
+    for (const content of Object.values(storedMessage)) {
+        const nested = content?.contextInfo?.quotedMessage
+        if (!nested || typeof nested !== 'object') continue
+
+        const mtype = Object.keys(nested).find(key => key === 'conversation' || key.endsWith('Message'))
+        if (!mtype) return null
+
+        const msg = nested[mtype]
+        const text = typeof msg === 'string'
+            ? msg
+            : msg?.text || msg?.caption || msg?.body?.text || msg?.header?.title || ''
+
+        return {
+            mtype,
+            msg,
+            message: nested,
+            text,
+            caption: msg?.caption || '',
+            mimetype: msg?.mimetype,
+            download: (saveToFile = false) => EliteProTech.downloadM({ msg }, mtype.replace(/Message$/i, ''), saveToFile)
+        }
+    }
+
+    return null
+}
+
+function resolveQuotedTarget(EliteProTech, m) {
+    const directQuote = m.quoted
+    if (!directQuote?.id || typeof EliteProTech.getStoredMessage !== 'function') return directQuote
+
+    const stored = EliteProTech.getStoredMessage(directQuote.fakeObj?.key || {
+        remoteJid: directQuote.chat || m.chat,
+        participant: directQuote.participant || directQuote.sender,
+        id: directQuote.id
+    })
+
+    return getNestedQuotedMessage(EliteProTech, stored) || directQuote
+}
+
 async function resendQuoted(EliteProTech, quoted, destination, quotedMessage) {
     const caption = quoted.text || quoted.caption || ''
 
@@ -58,7 +100,7 @@ let handler = async (m, { EliteProTech }) => {
     }
 
     try {
-        await resendQuoted(EliteProTech, m.quoted, m.chat, m)
+        await resendQuoted(EliteProTech, resolveQuotedTarget(EliteProTech, m), m.chat, m)
     } catch (error) {
         await m.reply(`Unable to process that message: ${error.message || String(error)}`)
     }
