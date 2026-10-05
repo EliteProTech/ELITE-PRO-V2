@@ -1,0 +1,16 @@
+{
+  "name": "elite-pro-v2",
+  "description": "ELITE-PRO-V2 WhatsApp bot",
+  "repository": "https://github.com/EliteProTech/ELITE-PRO-V2",
+  "keywords": [
+    "whatsapp",
+    "baileys",
+    "bot"
+  ],
+  "env": {
+    "SESSION_ID": {
+      "description": "Put your SESSION_ID here.",
+      "required": true
+    }
+  }
+}
