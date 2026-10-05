@@ -713,7 +713,7 @@ async function start() {
                 } else if (statusCode === DisconnectReason.connectionLost || statusCode === 0) {
                     delay = 8000
                 }
-                if (statusCode === 515) {
+                if ([500, 503, 515].includes(statusCode)) {
                     restartBot(delay)
                     return
                 }
