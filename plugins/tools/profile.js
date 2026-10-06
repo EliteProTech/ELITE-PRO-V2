@@ -1,10 +1,4 @@
-import { getGroupMetadata } from '../../lib/myfunc.js'
-
 const DEFAULT_PROFILE_PICTURE = 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png'
-
-function isWhatsAppJid(value) {
-    return typeof value === 'string' && /@(s\.whatsapp\.net|lid)$/i.test(value)
-}
 
 function formatUpdatedAt(value) {
     if (!value) return ''
@@ -16,43 +10,38 @@ function formatUpdatedAt(value) {
 }
 
 async function resolveTarget(m, EliteProTech, text) {
-    const number = String(text || '').replace(/\D/g, '')
-    if (number) return `${number}@s.whatsapp.net`
+    let target = m.sender
 
-    if (text?.trim() && !m.quoted && !(m.mentionedJid || []).length) {
-        throw new Error('Provide a valid number.')
+    if (m.quoted?.sender) {
+        target = m.quoted.sender
+    } else if (m.mentionedJid?.length) {
+        target = m.mentionedJid[0]
+    } else if (text?.trim()) {
+        const number = String(text).replace(/\D/g, '')
+        if (!number) throw new Error('Provide a valid number.')
+        target = `${number}@s.whatsapp.net`
     }
 
-    const candidates = [
-        m.quoted?.sender,
-        m.quoted?.participant,
-        m.mentionedJid?.[0],
-        m.sender,
-        m.senderLid,
-        m.key?.participant,
-        m.key?.participantAlt
-    ]
-    let target = candidates.find(isWhatsAppJid)
-    if (!target) throw new Error('Unable to determine a WhatsApp user from that message.')
-    if (target?.endsWith('@lid') && m.isGroup) {
-        try {
-            const metadata = await getGroupMetadata(EliteProTech, m.chat)
-            const participant = metadata?.participants?.find(member =>
-                member.id === target || member.lid === target
-            )
-            target = participant?.phoneNumber || target
-        } catch {}
+    if (target.endsWith('@lid')) {
+        target = await EliteProTech.resolveLidToJid(target)
     }
-    if (target?.endsWith('@lid')) target = await EliteProTech.resolveLidToJid(target)
-    target = EliteProTech.decodeJid(target)
-    if (!isWhatsAppJid(target)) throw new Error('Unable to resolve that WhatsApp user.')
-    return target
+
+    return EliteProTech.decodeJid(target)
+}
+
+function mentionedDisplayName(m, text) {
+    if (m.quoted?.sender) return ''
+    const value = String(text || '')
+    const match = value.match(/@([^\s@]+)/)
+    return match?.[1] || ''
 }
 
 let handler = async (m, { EliteProTech, text }) => {
     try {
         const target = await resolveTarget(m, EliteProTech, text)
         if (!target) return await m.reply('Unable to determine the profile target.')
+        const isLid = target.endsWith('@lid')
+        const displayName = mentionedDisplayName(m, text)
 
         let picture = DEFAULT_PROFILE_PICTURE
         try {
@@ -71,9 +60,11 @@ let handler = async (m, { EliteProTech, text }) => {
         } catch {}
 
         let business = ''
+        let accountType = 'Personal account'
         try {
             const profile = await EliteProTech.getBusinessProfile(target)
             if (profile) {
+                accountType = 'Business account'
                 const hours = profile.business_hours?.business_config
                     ?.map(day => `• ${String(day.day_of_week || 'Unknown').replace(/(^|_)(\w)/g, (_, space, letter) => `${space ? ' ' : ''}${letter.toUpperCase()}`)}: ${String(day.mode || 'N/A').replaceAll('_', ' ')}`)
                     .join('\n') || 'N/A'
@@ -81,14 +72,14 @@ let handler = async (m, { EliteProTech, text }) => {
             }
         } catch {}
 
-        const targetLabel = target.endsWith('@lid')
-            ? 'Hidden number (LID)'
+        const userLabel = isLid
+            ? `@${displayName || 'user'}`
             : `@${target.split('@')[0]}`
 
         await EliteProTech.sendMessage(m.chat, {
             image: { url: picture },
-            caption: `*User Profile*\n• Number: ${targetLabel}\n• About: ${about}${updatedAt ? `\n• Last Updated: ${updatedAt}` : ''}${business}`,
-            mentions: target.endsWith('@lid') ? [] : [target]
+            caption: `*User Profile*\n• User: ${userLabel}\n• Account: ${accountType}\n• About: ${about}${updatedAt ? `\n• Last Updated: ${updatedAt}` : ''}${business}`,
+            mentions: isLid ? [] : [target]
         }, { quoted: m })
     } catch (error) {
         await m.reply(`Unable to get that profile: ${error.message || String(error)}`)
