@@ -1,3 +1,5 @@
+import { getGroupMetadata } from '../../lib/myfunc.js'
+
 const DEFAULT_PROFILE_PICTURE = 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png'
 
 function isWhatsAppJid(value) {
@@ -32,6 +34,15 @@ async function resolveTarget(m, EliteProTech, text) {
     ]
     let target = candidates.find(isWhatsAppJid)
     if (!target) throw new Error('Unable to determine a WhatsApp user from that message.')
+    if (target?.endsWith('@lid') && m.isGroup) {
+        try {
+            const metadata = await getGroupMetadata(EliteProTech, m.chat)
+            const participant = metadata?.participants?.find(member =>
+                member.id === target || member.lid === target
+            )
+            target = participant?.phoneNumber || target
+        } catch {}
+    }
     if (target?.endsWith('@lid')) target = await EliteProTech.resolveLidToJid(target)
     target = EliteProTech.decodeJid(target)
     if (!isWhatsAppJid(target)) throw new Error('Unable to resolve that WhatsApp user.')
@@ -70,10 +81,14 @@ let handler = async (m, { EliteProTech, text }) => {
             }
         } catch {}
 
+        const targetLabel = target.endsWith('@lid')
+            ? 'Hidden number (LID)'
+            : `@${target.split('@')[0]}`
+
         await EliteProTech.sendMessage(m.chat, {
             image: { url: picture },
-            caption: `*User Profile*\n• Number: @${target.split('@')[0]}\n• About: ${about}${updatedAt ? `\n• Last Updated: ${updatedAt}` : ''}${business}`,
-            mentions: [target]
+            caption: `*User Profile*\n• Number: ${targetLabel}\n• About: ${about}${updatedAt ? `\n• Last Updated: ${updatedAt}` : ''}${business}`,
+            mentions: target.endsWith('@lid') ? [] : [target]
         }, { quoted: m })
     } catch (error) {
         await m.reply(`Unable to get that profile: ${error.message || String(error)}`)
