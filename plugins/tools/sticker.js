@@ -36,8 +36,6 @@ let handler = async (m, { EliteProTech, text }) => {
         if (customAuthor) author = customAuthor
     }
 
-    await m.reply('Creating sticker...')
-
     try {
         const buffer = await target.download()
         const ext = extFromMime(target.mimetype)
