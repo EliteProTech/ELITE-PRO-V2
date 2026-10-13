@@ -517,34 +517,6 @@ const getStatusCode = lastDisconnect => {
     }
 }
 
-const getDisconnectDiagnostic = lastDisconnect => {
-    const error = lastDisconnect?.error
-    if (!error) return { statusCode: 0, errorMessage: 'No disconnect error was provided.' }
-
-    return {
-        statusCode: getStatusCode(lastDisconnect) || null,
-        errorName: error.name || null,
-        errorMessage: error.message || null,
-        errorCode: error.code,
-        errorOutput: error.output
-            ? {
-                statusCode: error.output.statusCode,
-                payload: error.output.payload
-            }
-            : undefined,
-        errorData: error.data,
-        errorCause: error.cause
-            ? {
-                name: error.cause.name,
-                message: error.cause.message,
-                code: error.cause.code,
-                statusCode: error.cause.output?.statusCode || error.cause.statusCode,
-                data: error.cause.data
-            }
-            : undefined
-    }
-}
-
 function disableReconnectForLogout() {
     if (logoutDetected) return
     logoutDetected = true
@@ -606,7 +578,7 @@ async function start() {
         } catch (error) {
         }
 
-        EliteProTech = makeWASocket({
+        const socket = EliteProTech = makeWASocket({
             auth: state,
             browser: Browsers.ubuntu('Chrome'),
             logger: pino({ level: 'silent' }),
@@ -616,8 +588,9 @@ async function start() {
             syncFullHistory: false,
             cachedGroupMetadata: async (jid) => getGroupMetadata(EliteProTech, jid),
         })
+        let socketOpened = false
 
-        bind(EliteProTech)
+        bind(socket)
 
         if (!state.creds.registered) {
             console.log('Enter your number, for example: 234xxxxxxxxxx')
@@ -650,15 +623,17 @@ async function start() {
             }
         }
 
-        EliteProTech.ev.on('creds.update', async update => {
+        socket.ev.on('creds.update', async update => {
+            if (socket !== EliteProTech) return
             await saveCreds(update)
             if (update?.registered === false) disableReconnectForLogout()
         })
 
-        EliteProTech.ev.on('messages.upsert', async ({ messages, type }) => {
+        socket.ev.on('messages.upsert', async ({ messages, type }) => {
+            if (socket !== EliteProTech) return
             if (!messages?.length) return
             for (const raw of messages) {
-                EliteProTech.rememberMessage(raw)
+                socket.rememberMessage(raw)
             }
 
             if (type !== 'notify') return
@@ -668,14 +643,15 @@ async function start() {
                     try {
                         let m = raw
                         if (!m?.message || m.key.remoteJid === 'status@broadcast') return
-                        m = await smsg(EliteProTech, m)
-                        if (m) await handleMessage(EliteProTech, m)
+                        m = await smsg(socket, m)
+                        if (m) await handleMessage(socket, m)
                     } catch (e) {}
                 })
             }
         })
 
-        EliteProTech.ev.on('connection.update', async ({ connection, lastDisconnect }) => {
+        socket.ev.on('connection.update', async ({ connection, lastDisconnect }) => {
+            if (socket !== EliteProTech) return
             const statusCode = getStatusCode(lastDisconnect)
             const errorMessage = [
                 lastDisconnect?.error?.message,
@@ -687,20 +663,22 @@ async function start() {
             ].filter(Boolean).join(' ')
 
             if (connection === 'open') {
+                if (socketOpened) return
+                socketOpened = true
                 isConnecting = false
                 if (reconnectTimer) {
                     clearTimeout(reconnectTimer)
                     reconnectTimer = null
                 }
-                wireEventDispatchers(EliteProTech)
-                await followConfiguredNewsletters(EliteProTech)
-                console.log(chalk.greenBright(`[CONNECTION] Connected as ${EliteProTech.decodeJid(EliteProTech.user.id)}`))
+                wireEventDispatchers(socket)
+                await followConfiguredNewsletters(socket)
+                console.log(chalk.greenBright(`[CONNECTION] Connected as ${socket.decodeJid(socket.user.id)}`))
                 if (!connectionAnnounced) {
                     connectionAnnounced = true
                     try {
-                        const ownJid = EliteProTech.decodeJid(EliteProTech.user.id)
+                        const ownJid = socket.decodeJid(socket.user.id)
                         const botNumber = ownJid.split('@')[0]
-                        await EliteProTech.sendMessage(ownJid, {
+                        await socket.sendMessage(ownJid, {
                             text: `*${global.botName}*\n\nBot connected successfully.\n\nNumber: *${botNumber}*\nMode: *${global.botMode}* | Prefix: *${global.prefix || 'none'}*`
                         })
                     } catch (e) {}
@@ -709,6 +687,7 @@ async function start() {
             }
 
             if (connection === 'close') {
+                socketOpened = false
                 isConnecting = false
                 if (isLoggedOutDisconnect(statusCode, errorMessage)) {
                     disableReconnectForLogout()
@@ -721,12 +700,10 @@ async function start() {
                 } else if (statusCode === DisconnectReason.connectionLost || statusCode === 0) {
                     delay = 8000
                 }
-                if ([500, 503, 515].includes(statusCode)) {
-                    restartBot(delay)
-                    return
-                }
-                console.log('[CONNECTION] Disconnect diagnostic:', getDisconnectDiagnostic(lastDisconnect))
-                console.log(chalk.yellow(`[CONNECTION] Disconnected. Reconnecting in ${delay / 1000}s.`))
+                const reason = errorMessage.replace(/\s+/g, ' ').trim().slice(0, 120)
+                const code = statusCode || 'unknown'
+                const detail = reason ? `: ${reason}` : ''
+                console.log(chalk.yellow(`[CONNECTION] Disconnected (${code}${detail}). Reconnecting in ${delay / 1000}s.`))
                 restartBot(delay)
             }
         })
