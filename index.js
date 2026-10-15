@@ -27,6 +27,8 @@ const defaultSettings = {
     autoLikeStatusEmojis: ['💚'],
     autoReact: false,
     autoReactEmojis: ['💚'],
+    antiDelete: false,
+    antiDeleteMode: 'dm',
     antiViewOnceGlobal: false,
     antiViewOnceGroups: {},
     autoRead: false,
@@ -47,6 +49,8 @@ try {
     global.autoReactEmojis = Array.isArray(saved.autoReactEmojis) && saved.autoReactEmojis.length
         ? saved.autoReactEmojis.map(String).filter(Boolean)
         : defaultSettings.autoReactEmojis
+    global.antiDelete = saved.antiDelete === true
+    global.antiDeleteMode = saved.antiDeleteMode === 'chat' ? 'chat' : 'dm'
     global.antiViewOnceGlobal = saved.antiViewOnceGlobal === true
     global.antiViewOnceGroups = saved.antiViewOnceGroups && typeof saved.antiViewOnceGroups === 'object'
         ? saved.antiViewOnceGroups
@@ -64,6 +68,8 @@ try {
         autoLikeStatusEmojis: defaultSettings.autoLikeStatusEmojis,
         autoReact: defaultSettings.autoReact,
         autoReactEmojis: defaultSettings.autoReactEmojis,
+        antiDelete: defaultSettings.antiDelete,
+        antiDeleteMode: defaultSettings.antiDeleteMode,
         antiViewOnceGlobal: defaultSettings.antiViewOnceGlobal,
         antiViewOnceGroups: defaultSettings.antiViewOnceGroups,
         autoRead: defaultSettings.autoRead,
