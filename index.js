@@ -728,16 +728,37 @@ const server = http.createServer((req, res) => {
 })
 
 const PORT = process.env.PORT || 3000
+let healthServerStarting = false
+let healthServerReady = false
+let healthServerRetryTimer = null
 
 function startHealthServer() {
-    server.once('error', error => {
+    if (!isWorker || healthServerStarting || healthServerReady) return
+    healthServerStarting = true
+
+    const onListening = () => {
+        healthServerStarting = false
+        healthServerReady = true
+        server.off('error', onError)
+    }
+    const onError = error => {
+        healthServerStarting = false
+        server.off('listening', onListening)
         if (error.code === 'EADDRINUSE') {
-            setTimeout(startHealthServer, 1000)
+            if (!healthServerRetryTimer) {
+                healthServerRetryTimer = setTimeout(() => {
+                    healthServerRetryTimer = null
+                    startHealthServer()
+                }, 1000)
+            }
             return
         }
         console.error('[SERVER] Health server error:', error.message || error)
-    })
-    server.listen(PORT, () => {})
+    }
+
+    server.once('listening', onListening)
+    server.once('error', onError)
+    server.listen(PORT)
 }
 
 if (isWorker) startHealthServer()
@@ -764,6 +785,7 @@ const shutdown = async () => {
         process.exit(0)
     }
     try {
+        if (healthServerRetryTimer) clearTimeout(healthServerRetryTimer)
         if (reconnectTimer) clearTimeout(reconnectTimer)
         EliteProTech?.ev.removeAllListeners()
         EliteProTech?.ws?.close?.()
