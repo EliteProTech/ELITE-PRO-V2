@@ -2,7 +2,6 @@ import axios from 'axios'
 
 const API_URL = 'https://eliteprotech-apis.zone.id/download/apk'
 const MAX_APK_BYTES = 150 * 1024 * 1024
-const DISPLAY_RESULTS = 5
 
 const formatSize = bytes => {
     const value = Number(bytes)
@@ -50,33 +49,16 @@ function trustedApkUrl(value) {
 }
 
 let handler = async (m, { text = '', EliteProTech }) => {
-    const input = String(text).trim()
-    const selection = input.match(/(?:^|\s)(\d+)$/)
-    const query = selection ? input.slice(0, selection.index).trim() : input
+    const query = String(text).trim()
     if (!query || query.length > 120) {
-        return await m.reply(`Usage:\n${global.prefix || '.'}download <app name>\n${global.prefix || '.'}download <app name> <result number>\n\nExample: ${global.prefix || '.'}download whatsapp 1`)
+        return await m.reply(`Usage: ${global.prefix || '.'}apk <app name>\nExample: ${global.prefix || '.'}apk whatsapp`)
     }
 
     try {
         const results = await searchApks(query)
         if (!results.length) return await m.reply(`No APK results found for "${query}".`)
 
-        if (!selection) {
-            const shown = results.slice(0, DISPLAY_RESULTS)
-            const lines = shown.map((app, index) => {
-                const file = app?.file || {}
-                const rank = file.malware?.rank || app?.malware?.rank || 'not reported'
-                return `${index + 1}. *${app?.name || 'Unknown app'}*${file.vername ? ` v${file.vername}` : ''}\n   Package: ${app?.package || 'unknown'}\n   Size: ${formatSize(file.filesize || app?.size)} · Scan label: ${rank}`
-            })
-            return await m.reply(`📦 *APK results for:* ${query}\n\n${lines.join('\n\n')}\n\nReply with a number to download, for example:\n${global.prefix || '.'}download ${query} 1\n\nAPK scan labels are third-party information, not a guarantee that a file is safe.`)
-        }
-
-        const resultNumber = Number(selection[1])
-        if (resultNumber < 1 || resultNumber > Math.min(results.length, DISPLAY_RESULTS)) {
-            return await m.reply(`Choose a result from 1 to ${Math.min(results.length, DISPLAY_RESULTS)}.`)
-        }
-
-        const app = results[resultNumber - 1]
+        const app = results[0]
         const fileInfo = app?.file || {}
         const apkUrl = trustedApkUrl(fileInfo.path || fileInfo.path_alt)
         const reportedSize = Number(fileInfo.filesize || app?.size)
@@ -101,19 +83,18 @@ let handler = async (m, { text = '', EliteProTech }) => {
         if (apk.length > MAX_APK_BYTES) throw new Error(`The APK exceeds the ${formatSize(MAX_APK_BYTES)} send limit.`)
 
         const version = fileInfo.vername ? ` v${fileInfo.vername}` : ''
-        const scanRank = fileInfo.malware?.rank || app?.malware?.rank || 'not reported'
         const name = safeFilename(app?.name)
         return await EliteProTech.sendMessage(m.chat, {
             document: apk,
             mimetype: 'application/vnd.android.package-archive',
             fileName: `${name}${version ? `-${safeFilename(fileInfo.vername)}` : ''}.apk`,
-            caption: `📦 *${app?.name || 'APK'}*${version}\nPackage: ${app?.package || 'unknown'}\nReported scan label: ${scanRank} (not a safety guarantee)`
+            caption: `📦 *${app?.name || 'APK'}*${version}\nPackage: ${app?.package || 'unknown'}`
         }, { quoted: m })
     } catch (error) {
         return await m.reply(`APK download failed: ${error.message || String(error)}`)
     }
 }
 
-handler.command = ['download', 'apk']
+handler.command = ['apk']
 
 export default handler
