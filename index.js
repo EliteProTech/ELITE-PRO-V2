@@ -89,8 +89,6 @@ const pendingReloads = new Map()
 let pluginStartupComplete = false
 let eventStartupComplete = false
 
-const readJSON = file => JSON.parse(fs.readFileSync(file))
-
 const followedNewslettersRuntime = new Set()
 
 async function followConfiguredNewsletters(EliteProTech) {
@@ -247,6 +245,11 @@ export function wireEventDispatchers(EliteProTech) {
         if (wiredEventNames.has(name)) continue
         wiredEventNames.add(name)
         EliteProTech.ev.on(name, async (data) => {
+            if (name === 'messages.upsert' && data?.type === 'notify') {
+                const messages = (data.messages || []).filter(acceptMessage)
+                if (!messages.length) return
+                data = { ...data, messages }
+            }
             for (const handler of eventHandlers.values()) {
                 if (!handlerEventNames(handler).includes(name)) continue
                 try {
@@ -333,12 +336,6 @@ export default async function handleMessage(EliteProTech, m) {
         m.text = body
         m.isButtonResponse = isButtonResponse
 
-        const ownerList = readJSON('./database/owner.json')
-        const senderJid = EliteProTech.decodeJid(m.sender || '')
-        const senderLid = m.senderLid ? EliteProTech.decodeJid(m.senderLid) : null
-        const number = senderJid.split('@')[0]
-        const botNumber = EliteProTech.decodeJid(EliteProTech.user.id).split('@')[0]
-        m.isOwner = ownerList.includes(senderJid) || ownerList.includes(senderLid) || ownerList.includes(number) || number === botNumber
         if (global.botMode === 'self' && !m.isOwner && !m.fromMe) return
 
         const notifReply = async (text, title) => {
@@ -462,6 +459,9 @@ let eventsLoaded = false
 let isConnecting = false
 let connectionAnnounced = false
 let logoutDetected = false
+const BOT_START_TIME = Math.floor(Date.now() / 1000)
+const gateResults = new WeakMap()
+let reconnectAttempts = 0
 const processedMessageKeys = new Map()
 const MESSAGE_DEDUP_TTL = 5 * 60 * 1000
 const MESSAGE_DEDUP_LIMIT = 10_000
@@ -506,6 +506,15 @@ function isDuplicateMessage(message) {
     return false
 }
 
+function acceptMessage(raw) {
+    if (gateResults.has(raw)) return gateResults.get(raw)
+    const stamp = raw?.messageTimestamp
+    const timestamp = Number(stamp?.toNumber?.() ?? stamp) || 0
+    const accepted = !(timestamp && timestamp < BOT_START_TIME) && !isDuplicateMessage(raw)
+    gateResults.set(raw, accepted)
+    return accepted
+}
+
 const getStatusCode = lastDisconnect => {
     try {
         const error = lastDisconnect?.error
@@ -523,7 +532,7 @@ const getStatusCode = lastDisconnect => {
     }
 }
 
-function disableReconnectForLogout() {
+function disableReconnectForLogout(message = 'Device logged out. Delete the session folder, then pair the bot again.') {
     if (logoutDetected) return
     logoutDetected = true
     if (reconnectTimer) {
@@ -535,7 +544,7 @@ function disableReconnectForLogout() {
         EliteProTech?.ws?.close?.()
     } catch {}
     EliteProTech = null
-    console.log(chalk.redBright('[CONNECTION] Device logged out. Delete the session folder, then pair the bot again.'))
+    console.log(chalk.redBright(`[CONNECTION] ${message}`))
 }
 
 function restartBot(delay = 5000) {
@@ -644,7 +653,7 @@ async function start() {
 
             if (type !== 'notify') return
             for (const raw of messages) {
-                if (isDuplicateMessage(raw)) continue
+                if (!acceptMessage(raw)) continue
                 setImmediate(async () => {
                     try {
                         let m = raw
@@ -672,6 +681,7 @@ async function start() {
                 if (socketOpened) return
                 socketOpened = true
                 isConnecting = false
+                reconnectAttempts = 0
                 if (reconnectTimer) {
                     clearTimeout(reconnectTimer)
                     reconnectTimer = null
@@ -700,11 +710,16 @@ async function start() {
                     return
                 }
                 if (logoutDetected) return
-                let delay = 5000
-                if (errorMessage.includes('Stream Errored')) {
-                    delay = 15000
-                } else if (statusCode === DisconnectReason.connectionLost || statusCode === 0) {
-                    delay = 8000
+                if (statusCode === DisconnectReason.connectionReplaced) {
+                    disableReconnectForLogout('Session opened on another instance. Reconnect stopped to avoid a takeover loop.')
+                    return
+                }
+                let delay = 1000
+                if (statusCode !== DisconnectReason.restartRequired) {
+                    const base = errorMessage.includes('Stream Errored')
+                        ? 15000
+                        : (statusCode === DisconnectReason.connectionLost || statusCode === 0) ? 8000 : 5000
+                    delay = Math.min(base * 2 ** Math.min(reconnectAttempts++, 4), 120000)
                 }
                 const reason = errorMessage.replace(/\s+/g, ' ').trim().slice(0, 120)
                 const code = statusCode || 'unknown'
@@ -793,11 +808,16 @@ const shutdown = async () => {
     process.exit(0)
 }
 
+process.on('unhandledRejection', error => console.error('[UNHANDLED]', error))
+process.on('uncaughtException', error => console.error('[UNCAUGHT]', error))
 process.on('SIGINT', shutdown)
 process.on('SIGTERM', shutdown)
 
+let supervisorDelay = 500
+
 function startSupervisor() {
     if (supervisorStopping) return
+    const startedAt = Date.now()
     supervisorWorker = spawn(process.execPath, [process.argv[1], '--child'], {
         stdio: ['inherit', 'inherit', 'inherit', 'ipc'],
         env: process.env
@@ -809,7 +829,9 @@ function startSupervisor() {
 
     supervisorWorker.on('exit', () => {
         supervisorWorker = null
-        if (!supervisorStopping) setTimeout(startSupervisor, 500)
+        if (supervisorStopping) return
+        supervisorDelay = Date.now() - startedAt > 30000 ? 500 : Math.min(supervisorDelay * 2, 60000)
+        setTimeout(startSupervisor, supervisorDelay)
     })
 }
 
