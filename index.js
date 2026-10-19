@@ -668,7 +668,9 @@ async function start() {
                         if (!m?.message || m.key.remoteJid === 'status@broadcast') return
                         m = await smsg(socket, m)
                         if (m) await handleMessage(socket, m)
-                    } catch (e) {}
+                    } catch (e) {
+                        console.error('[MESSAGE] Failed to process message:', e)
+                    }
                 })
             }
         })
@@ -732,7 +734,7 @@ async function start() {
                 const reason = errorMessage.replace(/\s+/g, ' ').trim().slice(0, 120)
                 const code = statusCode || 'unknown'
                 const detail = reason ? `: ${reason}` : ''
-                console.log(chalk.yellow(`[CONNECTION] Disconnected (${code}${detail}). Reconnecting in ${delay / 1000}s.`))
+                if (statusCode !== DisconnectReason.restartRequired) console.log(chalk.yellow(`[CONNECTION] Disconnected (${code}${detail}). Reconnecting in ${delay / 1000}s.`))
                 restartBot(delay)
             }
         })
