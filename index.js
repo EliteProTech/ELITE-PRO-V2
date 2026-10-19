@@ -6,7 +6,7 @@ import { spawn } from 'child_process'
 import pino from 'pino'
 import chalk from 'chalk'
 import { fileURLToPath, pathToFileURL } from 'url'
-import { useMultiFileAuthState, DisconnectReason, Browsers, fetchLatestBaileysVersion } from '@whiskeysockets/baileys'
+import { useMultiFileAuthState, makeCacheableSignalKeyStore, BufferJSON, DisconnectReason, Browsers, fetchLatestBaileysVersion } from '@whiskeysockets/baileys'
 import { smsg, makeWASocket, bind, sendNotification, getGroupMetadata } from './lib/myfunc.js'
 import { suppressSignalLogs } from './lib/filter.js'
 import './config.js'
@@ -574,7 +574,7 @@ async function start() {
         }
 
         const credsPath = path.join(__dirname, 'session', 'creds.json')
-        if (!fs.existsSync(credsPath) && global.session) {
+        if ((!fs.existsSync(credsPath) || fs.statSync(credsPath).size === 0) && global.session) {
             try {
                 const sessionData = parseSessionData(global.session)
                 fs.mkdirSync(path.dirname(credsPath), { recursive: true })
@@ -593,15 +593,17 @@ async function start() {
         } catch (error) {
         }
 
+        const logger = pino({ level: 'silent' })
         const socket = EliteProTech = makeWASocket({
-            auth: state,
+            auth: { creds: state.creds, keys: makeCacheableSignalKeyStore(state.keys, logger) },
             browser: Browsers.ubuntu('Chrome'),
-            logger: pino({ level: 'silent' }),
+            logger,
             ...(version ? { version } : {}),
             printQRInTerminal: false,
             markOnlineOnConnect: false,
             syncFullHistory: false,
             cachedGroupMetadata: async (jid) => getGroupMetadata(EliteProTech, jid),
+            getMessage: async (key) => socket.getStoredMessage?.(key),
         })
         let socketOpened = false
 
@@ -640,7 +642,13 @@ async function start() {
 
         socket.ev.on('creds.update', async update => {
             if (socket !== EliteProTech) return
-            await saveCreds(update)
+            try {
+                const temp = `${credsPath}.tmp`
+                fs.writeFileSync(temp, JSON.stringify(state.creds, BufferJSON.replacer))
+                fs.renameSync(temp, credsPath)
+            } catch {
+                await saveCreds(update)
+            }
             if (update?.registered === false) disableReconnectForLogout()
         })
 
