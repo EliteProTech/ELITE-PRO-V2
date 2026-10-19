@@ -8,7 +8,6 @@
     "start": "node index.js"
   },
   "dependencies": {
-    "@hapi/boom": "^10.0.1",
     "@whiskeysockets/baileys": "^7.0.0-rc14",
     "axios": "^1.7.9",
     "chalk": "^4.1.2",
