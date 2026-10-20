@@ -35,8 +35,5 @@ let handler = async (m, { EliteProTech, args, command }) => {
 }
 
 handler.command = ['pinmsg', 'unpinmsg']
-handler.group = true
-handler.admin = true
-handler.isBotAdmin = true
 
 export default handler
