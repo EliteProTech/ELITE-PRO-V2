@@ -1,15 +1,3 @@
-function lastMessage(m) {
-    return [{
-        key: {
-            remoteJid: m.chat,
-            fromMe: Boolean(m.key?.fromMe),
-            id: m.key?.id,
-            participant: m.key?.participant || undefined
-        },
-        messageTimestamp: m.messageTimestamp || Math.floor(Date.now() / 1000)
-    }]
-}
-
 function quotedStarKey(m) {
     if (!m.quoted?.id) return null
     return {
@@ -18,7 +6,7 @@ function quotedStarKey(m) {
     }
 }
 
-let handler = async (m, { EliteProTech, command, args }) => {
+let handler = async (m, { EliteProTech, command }) => {
     try {
         if (command === 'pin' || command === 'unpin') {
             await EliteProTech.chatModify({ pin: command === 'pin' }, m.chat)
@@ -33,16 +21,28 @@ let handler = async (m, { EliteProTech, command, args }) => {
         }
 
         if (command === 'clearchat' || command === 'deletechat') {
-            if (args[0]?.toLowerCase() !== 'confirm') {
-                const label = command === 'clearchat' ? 'clear this chat locally' : 'delete this chat locally'
-                return await m.reply(`This will ${label} from your WhatsApp chat list. It will not delete messages for other people.\n\nRun *${global.prefix || ''}${command} confirm* to continue.`)
+            global.chatToolConfirmations ??= new Map()
+            const now = Date.now()
+            for (const [key, pending] of global.chatToolConfirmations) {
+                if (pending.expiresAt <= now) global.chatToolConfirmations.delete(key)
             }
-            await EliteProTech.chatModify(
-                command === 'clearchat'
-                    ? { clear: true, lastMessages: lastMessage(m) }
-                    : { delete: true, lastMessages: lastMessage(m) },
-                m.chat
-            )
+
+            const label = command === 'clearchat' ? 'clear this chat locally' : 'delete this chat locally'
+            const sent = await EliteProTech.sendMessage(m.chat, {
+                text: `⚠️ This will ${label} from your WhatsApp chat list. It will not delete messages for other people.\n\nReply to this message with *confirm* within 60 seconds to continue.`
+            }, { quoted: m })
+
+            const key = `${m.chat}:${m.sender}`
+            global.chatToolConfirmations.delete(key)
+            global.chatToolConfirmations.set(key, {
+                action: command,
+                chat: m.chat,
+                messageId: sent.key.id,
+                expiresAt: now + 60_000
+            })
+            while (global.chatToolConfirmations.size > 100) {
+                global.chatToolConfirmations.delete(global.chatToolConfirmations.keys().next().value)
+            }
             return
         }
     } catch (error) {
