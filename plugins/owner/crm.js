@@ -1,4 +1,4 @@
-import { generateWAMessageFromContent, proto } from '@whiskeysockets/baileys'
+import { proto } from '@whiskeysockets/baileys'
 
 const MAX_EXPORT_BYTES = 5 * 1024 * 1024
 
@@ -97,13 +97,7 @@ let handler = async (m, { EliteProTech, command }) => {
             }
 
             const content = proto.Message.fromObject(exported.payloadObject)
-            const outgoing = generateWAMessageFromContent(m.chat, content, {
-                userJid: EliteProTech.user.id,
-                quoted: m
-            })
-
-            await EliteProTech.relayMessage(m.chat, outgoing.message, {
-                messageId: outgoing.key.id,
+            await EliteProTech.relayMessage(m.chat, content, {
                 additionalNodes: Array.isArray(exported.relayNodes) ? exported.relayNodes : []
             })
             return await EliteProTech.sendMessage(m.chat, {
