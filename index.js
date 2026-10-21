@@ -715,7 +715,7 @@ async function start() {
             if (connection === 'close') {
                 socketOpened = false
                 isConnecting = false
-                if (isLoggedOutDisconnect(statusCode, errorMessage)) {
+                if (isLoggedOutDisconnect(statusCode)) {
                     disableReconnectForLogout()
                     return
                 }
@@ -796,12 +796,7 @@ export function requestRestart() {
     process.exit(0)
 }
 
-const isLoggedOutDisconnect = (statusCode, errorMessage = '') => {
-    const message = String(errorMessage).toLowerCase()
-    return Number(statusCode) === Number(DisconnectReason.loggedOut) ||
-        Number(statusCode) === 401 ||
-        /logged.?out|device.?removed|unauthorized|not.?authorized|invalid.*session|bad.*mac|device.?logout|session.*logout/.test(message)
-}
+const isLoggedOutDisconnect = statusCode => Number(statusCode) === Number(DisconnectReason.loggedOut)
 
 const shutdown = async () => {
     if (!isWorker) {
