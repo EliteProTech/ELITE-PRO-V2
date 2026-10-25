@@ -2,7 +2,6 @@ import crypto from 'crypto'
 import { proto, getContentType } from '@whiskeysockets/baileys'
 
 const MEDIA_HOST = 'https://mmg.whatsapp.net'
-const MAX_MEDIA_BYTES = (Number(process.env.MAX_DOWNLOAD_MB) || 64) * 1024 * 1024
 
 function findChannelPostLink(value = '') {
     const match = String(value).match(/(?:https?:\/\/)?(?:www\.)?whatsapp\.com\/channel\/[A-Za-z0-9_-]+\/\d+(?:\?[^\s<>]*)?/i)
@@ -64,14 +63,10 @@ async function downloadMedia(media) {
         : media.directPath ? `${MEDIA_HOST}${media.directPath}` : ''
     if (!url) throw new Error('The post has no media link.')
 
-    const declared = Number(media.fileLength?.toNumber?.() ?? media.fileLength) || 0
-    if (declared > MAX_MEDIA_BYTES) throw new Error(`Media is too large (${Math.round(declared / 1048576)} MB).`)
-
     const response = await fetch(url, { signal: AbortSignal.timeout(60000) })
     if (!response.ok) throw new Error(`Media download failed (${response.status}).`)
 
     const buffer = Buffer.from(await response.arrayBuffer())
-    if (buffer.length > MAX_MEDIA_BYTES) throw new Error(`Media is too large (${Math.round(buffer.length / 1048576)} MB).`)
 
     if (media.fileSha256?.length) {
         const hash = crypto.createHash('sha256').update(buffer).digest()
