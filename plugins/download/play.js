@@ -49,7 +49,7 @@ const isSafeLink = value => {
 
 let handler = async (m, { EliteProTech, text = '' }) => {
     const query = String(text).trim()
-    if (!query) return m.reply(`Usage: ${global.prefix || '.'}play <song name or YouTube link>\n${global.prefix || '.'}ytmp3 <YouTube link>`)
+    if (!query) return m.reply(`*Usage:* ${global.prefix || '.'}play <song name or YouTube link>`)
 
     let video
     try {
