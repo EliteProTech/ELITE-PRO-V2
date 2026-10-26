@@ -107,6 +107,6 @@ let handler = async (m, { EliteProTech, text = '' }) => {
     }
 }
 
-handler.command = ['play', 'song', 'ytmp3', 'yta']
+handler.command = ['play', 'ytmp3', 'yta']
 
 export default handler
