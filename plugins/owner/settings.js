@@ -11,7 +11,9 @@ let handler = async (m) => {
         `Mode: *${global.botMode}*\n\n` +
         `Auto-view status: *${status(global.autoViewStatus)}*\n` +
         `Auto-like status: *${status(global.autoLikeStatus)}* (${global.autoLikeStatusEmojis?.join(' ') || '💚'})\n` +
+        `Auto-react: *${status(global.autoReact)}* (${global.autoReactEmojis?.join(' ') || '💚'})\n` +
         `Anti-view-once: *${global.antiViewOnceGlobal ? 'GLOBAL ON' : 'GLOBAL OFF'}* (${Object.keys(global.antiViewOnceGroups || {}).length} group rule(s))\n` +
+        `Anti-delete: *${status(global.antiDelete)}* (${global.antiDeleteMode === 'chat' ? 'same chat' : 'owner DM'})\n` +
         `Auto-read: *${status(global.autoRead)}*\n` +
         `Auto-recording: *${status(global.autoRecording)}*\n` +
         `Auto-typing: *${status(global.autoTyping)}*\n` +
