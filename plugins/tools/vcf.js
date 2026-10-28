@@ -46,11 +46,32 @@ async function resolveNumber(EliteProTech, participant) {
 }
 
 function findName(EliteProTech, participant, number) {
-    const keys = [`${number}@s.whatsapp.net`, participant.id, participant.lid, participant.phoneNumber].filter(Boolean)
+    const botName = String(EliteProTech.user?.name || '').trim().toLocaleLowerCase()
+    const directNames = [participant.notify, participant.name, participant.verifiedName, participant.username]
+    const keys = [
+        `${number}@s.whatsapp.net`,
+        participant.phoneNumber,
+        participant.id,
+        participant.lid
+    ].filter(Boolean)
+
     for (const key of keys) {
-        const contact = EliteProTech.contacts?.[key] || EliteProTech.chats?.[key]
-        const name = contact?.name || contact?.verifiedName || contact?.notify
-        if (name) return String(name)
+        const normalizedKey = EliteProTech.decodeJid?.(key) || key
+        const contact = EliteProTech.contacts?.[key] || EliteProTech.contacts?.[normalizedKey]
+        const chat = EliteProTech.chats?.[key] || EliteProTech.chats?.[normalizedKey]
+        directNames.push(
+            contact?.notify,
+            contact?.name,
+            contact?.verifiedName,
+            chat?.notify,
+            chat?.name
+        )
+    }
+
+    for (const candidate of directNames) {
+        const name = String(candidate || '').replace(/[\u0000-\u001f]/g, ' ').trim()
+        if (!name || name === `+${number}` || name.replace(/\s+/g, ' ').toLocaleLowerCase() === botName) continue
+        return name
     }
     return ''
 }
@@ -76,7 +97,7 @@ async function sendGroupFile(EliteProTech, m) {
         }
         if (number === botNumber || seen.has(number)) continue
         seen.add(number)
-        cards.push(buildCard(findName(EliteProTech, participant, number) || `${groupName} +${number}`, number))
+        cards.push(buildCard(findName(EliteProTech, participant, number) || `+${number}`, number))
     }
 
     if (!cards.length) return m.reply('None of the members have a phone number I can resolve.')
