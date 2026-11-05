@@ -455,6 +455,8 @@ const delay = milliseconds => new Promise(resolve => setTimeout(resolve, millise
 
 let EliteProTech
 let reconnectTimer = null
+let reconnectStabilityTimer = null
+const RECONNECT_STABLE_MS = 60_000
 let pluginsLoaded = false
 let eventsLoaded = false
 let isConnecting = false
@@ -539,6 +541,10 @@ function disableReconnectForLogout(message = 'Device logged out. Delete the sess
     if (reconnectTimer) {
         clearTimeout(reconnectTimer)
         reconnectTimer = null
+    }
+    if (reconnectStabilityTimer) {
+        clearTimeout(reconnectStabilityTimer)
+        reconnectStabilityTimer = null
     }
     try {
         EliteProTech?.ev.removeAllListeners()
@@ -692,7 +698,11 @@ async function start() {
                 if (socketOpened) return
                 socketOpened = true
                 isConnecting = false
-                reconnectAttempts = 0
+                if (reconnectStabilityTimer) clearTimeout(reconnectStabilityTimer)
+                reconnectStabilityTimer = setTimeout(() => {
+                    reconnectStabilityTimer = null
+                    if (socket === EliteProTech && socketOpened) reconnectAttempts = 0
+                }, RECONNECT_STABLE_MS)
                 if (reconnectTimer) {
                     clearTimeout(reconnectTimer)
                     reconnectTimer = null
@@ -716,6 +726,10 @@ async function start() {
             if (connection === 'close') {
                 socketOpened = false
                 isConnecting = false
+                if (reconnectStabilityTimer) {
+                    clearTimeout(reconnectStabilityTimer)
+                    reconnectStabilityTimer = null
+                }
                 if (isLoggedOutDisconnect(statusCode)) {
                     disableReconnectForLogout()
                     return
@@ -808,6 +822,7 @@ const shutdown = async () => {
     try {
         if (healthServerRetryTimer) clearTimeout(healthServerRetryTimer)
         if (reconnectTimer) clearTimeout(reconnectTimer)
+        if (reconnectStabilityTimer) clearTimeout(reconnectStabilityTimer)
         EliteProTech?.ev.removeAllListeners()
         EliteProTech?.ws?.close?.()
     } catch {}

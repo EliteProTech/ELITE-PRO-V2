@@ -90,27 +90,103 @@ const reloadRuntimeFiles = async files => {
 }
 
 const updateWithGit = async repo => {
+    const { stdout: before } = await execFileAsync(
+        'git',
+        ['-C', projectRoot, 'rev-parse', 'HEAD'],
+        { maxBuffer: 1024 * 1024 }
+    )
     const { stdout: status } = await execFileAsync(
         'git',
         ['-C', projectRoot, 'status', '--porcelain'],
         { maxBuffer: 1024 * 1024 }
     )
 
+    let savedLocalChanges = false
     if (status.trim()) {
-        throw new Error('Local changes detected. Commit or stash them before updating.')
+        let previousStash = ''
+        try {
+            const { stdout } = await execFileAsync(
+                'git',
+                ['-C', projectRoot, 'rev-parse', '--verify', 'refs/stash'],
+                { maxBuffer: 1024 * 1024 }
+            )
+            previousStash = stdout.trim()
+        } catch {}
+
+        await execFileAsync(
+            'git',
+            ['-C', projectRoot, 'stash', 'push', '--include-untracked', '-m', `ELITE-PRO-V2 update ${Date.now()}`],
+            { maxBuffer: 1024 * 1024 }
+        )
+
+        const { stdout: remainingChanges } = await execFileAsync(
+            'git',
+            ['-C', projectRoot, 'status', '--porcelain'],
+            { maxBuffer: 1024 * 1024 }
+        )
+        let currentStash = ''
+        try {
+            const { stdout } = await execFileAsync(
+                'git',
+                ['-C', projectRoot, 'rev-parse', '--verify', 'refs/stash'],
+                { maxBuffer: 1024 * 1024 }
+            )
+            currentStash = stdout.trim()
+        } catch {}
+
+        savedLocalChanges = Boolean(currentStash && currentStash !== previousStash)
+        if (remainingChanges.trim() || !savedLocalChanges) {
+            let restoreNote = ''
+            if (savedLocalChanges) {
+                try {
+                    await execFileAsync('git', ['-C', projectRoot, 'stash', 'pop', '--index'], { maxBuffer: 10 * 1024 * 1024 })
+                    savedLocalChanges = false
+                } catch (error) {
+                    restoreNote = ` Local changes remain saved in Git stash: ${error.stderr || error.message || error}`
+                }
+            }
+            throw new Error(`Could not safely save all local changes to Git stash. No update was applied.${restoreNote}`)
+        }
     }
 
-    const { stdout: before } = await execFileAsync(
-        'git',
-        ['-C', projectRoot, 'rev-parse', 'HEAD'],
-        { maxBuffer: 1024 * 1024 }
-    )
+    let stdout = ''
+    let stderr = ''
+    try {
+        const result = await execFileAsync(
+            'git',
+            ['-C', projectRoot, 'pull', '--ff-only', repo.url, branch],
+            { maxBuffer: 10 * 1024 * 1024 }
+        )
+        stdout = result.stdout
+        stderr = result.stderr
+    } catch (error) {
+        if (savedLocalChanges) {
+            try {
+                await execFileAsync(
+                    'git',
+                    ['-C', projectRoot, 'stash', 'pop', '--index'],
+                    { maxBuffer: 10 * 1024 * 1024 }
+                )
+            } catch (restoreError) {
+                error.message = `${error.message || 'Git pull failed.'} Local changes remain saved in Git stash because automatic restore failed: ${restoreError.stderr || restoreError.message || restoreError}`
+            }
+        }
+        throw error
+    }
 
-    const { stdout, stderr } = await execFileAsync(
-        'git',
-        ['-C', projectRoot, 'pull', '--ff-only', repo.url, branch],
-        { maxBuffer: 10 * 1024 * 1024 }
-    )
+    if (savedLocalChanges) {
+        try {
+            await execFileAsync(
+                'git',
+                ['-C', projectRoot, 'stash', 'pop', '--index'],
+                { maxBuffer: 10 * 1024 * 1024 }
+            )
+        } catch (error) {
+            throw new Error(
+                `Remote update was fetched, but local changes could not be restored cleanly. They remain saved in Git stash; resolve the conflicts before running or restarting the bot.\n${error.stderr || error.message || error}`
+            )
+        }
+    }
 
     const { stdout: after } = await execFileAsync(
         'git',
@@ -125,7 +201,7 @@ const updateWithGit = async repo => {
     )
 
     return {
-        text: (stdout || stderr || 'Already up to date.').trim(),
+        text: `${(stdout || stderr || 'Already up to date.').trim()}${savedLocalChanges ? '\nLocal changes were restored after updating.' : ''}`,
         files: normalizeChangedFiles(changed.split(/\r?\n/))
     }
 }
@@ -220,7 +296,12 @@ const restartAfterUpdate = EliteProTech => {
     }, 1000)
 }
 
+let updateInProgress = false
+
 let handler = async (m, { EliteProTech }) => {
+    if (updateInProgress) return await m.reply('An update is already in progress. Please wait for it to finish.')
+    updateInProgress = true
+
     try {
         const repo = getRepo()
 
@@ -261,6 +342,8 @@ let handler = async (m, { EliteProTech }) => {
         await m.reply(
             `*Update failed*\n\n${output.slice(-3000)}`
         )
+    } finally {
+        updateInProgress = false
     }
 }
 
