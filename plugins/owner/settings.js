@@ -9,7 +9,7 @@ let handler = async (m) => {
         `*Bot Settings*\n\n` +
         `Prefix: *${prefix}*\n` +
         `Mode: *${global.botMode}*\n\n` +
-        `Chatbot: *${status(global.chatbotEnabled)}*\n` +
+        `Chatbot mode: *${global.chatbotMode || 'off'}*\n` +
         `Auto-view status: *${status(global.autoViewStatus)}*\n` +
         `Auto-like status: *${status(global.autoLikeStatus)}* (${global.autoLikeStatusEmojis?.join(' ') || '💚'})\n` +
         `Auto-react: *${status(global.autoReact)}* (${global.autoReactEmojis?.join(' ') || '💚'})\n` +

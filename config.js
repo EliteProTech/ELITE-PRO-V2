@@ -36,8 +36,13 @@ const envEmojis = (name, fallback) => {
     return emojis?.length ? emojis : fallback
 }
 
+const envChoice = (name, choices, fallback) => {
+    const value = process.env[name]?.trim().toLowerCase()
+    return choices.includes(value) ? value : fallback
+}
+
 global.settingsDefaults = {
-    chatbotEnabled: envBoolean('CHATBOT_ENABLED'),
+    chatbotMode: envChoice('CHATBOT_MODE', ['off', 'dm', 'group', 'all', 'mention'], 'off'),
     autoViewStatus: envBoolean('AUTO_VIEW_STATUS'),
     autoLikeStatus: envBoolean('AUTO_LIKE_STATUS'),
     autoLikeStatusEmojis: envEmojis('AUTO_LIKE_STATUS_EMOJIS', ['💚']),

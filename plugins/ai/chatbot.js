@@ -14,20 +14,25 @@ function readSettings() {
 
 let handler = async (m, { args }) => {
     const choice = args[0]?.toLowerCase()
-    if (!choice || !['on', 'off'].includes(choice)) {
+    const modes = new Set(['dm', 'group', 'all', 'mention', 'off'])
+    if (!choice || (!modes.has(choice) && choice !== 'on')) {
         return await m.reply(
-            `Chatbot is *${global.chatbotEnabled ? 'ON' : 'OFF'}*.\n` +
-            `When enabled, it replies to text in DMs and when mentioned or replied to in groups.\n\n` +
-            `Usage: ${global.prefix || ''}chatbot on | off`
+            `Chatbot mode: *${global.chatbotMode || 'off'}*.\n\n` +
+            `Usage: ${global.prefix || ''}chatbot dm | group | all | mention | off\n` +
+            `• dm: answer in private chats\n` +
+            `• group: answer every group message\n` +
+            `• all: answer in DMs and groups\n` +
+            `• mention: answer when mentioned or replied to in groups`
         )
     }
 
-    global.chatbotEnabled = choice === 'on'
+    global.chatbotMode = choice === 'on' ? 'all' : choice
     const settings = readSettings()
-    settings.chatbotEnabled = global.chatbotEnabled
+    delete settings.chatbotEnabled
+    settings.chatbotMode = global.chatbotMode
     fs.writeFileSync(SETTINGS_PATH, JSON.stringify(settings, null, 2))
 
-    return await m.reply(`Chatbot is now *${global.chatbotEnabled ? 'ON' : 'OFF'}*.`)
+    return await m.reply(`Chatbot mode set to *${global.chatbotMode}*.`)
 }
 
 handler.command = ['chatbot']

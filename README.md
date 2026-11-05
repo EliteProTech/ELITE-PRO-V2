@@ -50,10 +50,10 @@ DON'T FORGET TO FORK 🍴 & STAR 🌟 OUR REPO🫠
 
 Automation defaults can also be set as environment variables on your host. Boolean values accept `true`/`false` (also `1`/`0`, `yes`/`no`, or `on`/`off`). A value saved later by an owner command takes precedence on future restarts.
 
-When enabled, the chatbot answers text messages in DMs and responds in groups only when the bot is mentioned or someone replies to a bot message. Use `.chatbot on` or `.chatbot off` to change it; text from a quoted message is included as context.
+Set the chatbot mode with `.chatbot dm`, `.chatbot group`, `.chatbot all`, `.chatbot mention`, or `.chatbot off`. `dm` answers in private chats, `group` answers every group message, `all` answers in DMs and groups, and `mention` answers in groups only when the bot is mentioned or someone replies to a bot message. Quoted text is included as context.
 
 ```env
-CHATBOT_ENABLED=false
+CHATBOT_MODE=off
 AUTO_VIEW_STATUS=false
 AUTO_LIKE_STATUS=false
 AUTO_LIKE_STATUS_EMOJIS=💚

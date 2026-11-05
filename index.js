@@ -20,10 +20,11 @@ const eventDir = path.join(__dirname, 'lib', 'events')
 const settingsPath = path.join(__dirname, 'database', 'settings.json')
 export const NEWSLETTER_IDS = ['120363287352245413@newsletter']
 const environmentSettings = global.settingsDefaults || {}
+const chatbotModes = new Set(['off', 'dm', 'group', 'all', 'mention'])
 const defaultSettings = {
     prefix: '.',
     mode: 'self',
-    chatbotEnabled: environmentSettings.chatbotEnabled ?? false,
+    chatbotMode: environmentSettings.chatbotMode || 'off',
     autoViewStatus: environmentSettings.autoViewStatus ?? false,
     autoLikeStatus: environmentSettings.autoLikeStatus ?? false,
     autoLikeStatusEmojis: environmentSettings.autoLikeStatusEmojis || ['💚'],
@@ -40,7 +41,11 @@ try {
     const saved = JSON.parse(fs.readFileSync(settingsPath, 'utf-8'))
     global.prefix = typeof saved.prefix === 'string' ? saved.prefix : defaultSettings.prefix
     global.botMode = saved.mode === 'public' ? 'public' : defaultSettings.mode
-    global.chatbotEnabled = typeof saved.chatbotEnabled === 'boolean' ? saved.chatbotEnabled : defaultSettings.chatbotEnabled
+    global.chatbotMode = chatbotModes.has(saved.chatbotMode)
+        ? saved.chatbotMode
+        : typeof saved.chatbotEnabled === 'boolean'
+            ? (saved.chatbotEnabled ? 'all' : 'off')
+            : defaultSettings.chatbotMode
     global.autoViewStatus = typeof saved.autoViewStatus === 'boolean' ? saved.autoViewStatus : defaultSettings.autoViewStatus
     global.autoLikeStatus = typeof saved.autoLikeStatus === 'boolean' ? saved.autoLikeStatus : defaultSettings.autoLikeStatus
     global.autoLikeStatusEmojis = Array.isArray(saved.autoLikeStatusEmojis) && saved.autoLikeStatusEmojis.length
@@ -60,7 +65,7 @@ try {
     Object.assign(global, {
         prefix: defaultSettings.prefix,
         botMode: defaultSettings.mode,
-        chatbotEnabled: defaultSettings.chatbotEnabled,
+        chatbotMode: defaultSettings.chatbotMode,
         autoViewStatus: defaultSettings.autoViewStatus,
         autoLikeStatus: defaultSettings.autoLikeStatus,
         autoLikeStatusEmojis: defaultSettings.autoLikeStatusEmojis,
