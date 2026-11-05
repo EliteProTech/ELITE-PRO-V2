@@ -38,9 +38,9 @@ function apiError(data, fallback) {
     return fallback
 }
 
-let handler = async (m, { text = '', EliteProTech }) => {
+let handler = async (m, { text = '', command, EliteProTech }) => {
     const url = String(text).trim()
-    if (!url) return m.reply(`Usage: ${global.prefix || '.'}ytmp4 <YouTube link>`)
+    if (!url) return m.reply(`Usage: ${global.prefix || '.'}${command} <YouTube link>`)
     if (!isYouTubeUrl(url)) return m.reply('Send a valid HTTPS YouTube video link.')
 
     try {
