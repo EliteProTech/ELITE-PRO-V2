@@ -19,27 +19,28 @@ const eventDir = path.join(__dirname, 'lib', 'events')
 
 const settingsPath = path.join(__dirname, 'database', 'settings.json')
 export const NEWSLETTER_IDS = ['120363287352245413@newsletter']
+const environmentSettings = global.settingsDefaults || {}
 const defaultSettings = {
     prefix: '.',
     mode: 'self',
-    autoViewStatus: false,
-    autoLikeStatus: false,
-    autoLikeStatusEmojis: ['💚'],
-    autoReact: false,
-    autoReactEmojis: ['💚'],
+    chatbotEnabled: environmentSettings.chatbotEnabled ?? false,
+    autoViewStatus: environmentSettings.autoViewStatus ?? false,
+    autoLikeStatus: environmentSettings.autoLikeStatus ?? false,
+    autoLikeStatusEmojis: environmentSettings.autoLikeStatusEmojis || ['💚'],
+    autoReact: environmentSettings.autoReact ?? false,
+    autoReactEmojis: environmentSettings.autoReactEmojis || ['💚'],
     antiDelete: false,
     antiDeleteMode: 'dm',
-    antiViewOnceGlobal: false,
-    antiViewOnceGroups: {},
-    autoRead: false,
-    autoRecording: false,
-    autoTyping: false,
-    autoRecordType: false
+    autoRead: environmentSettings.autoRead ?? false,
+    autoRecording: environmentSettings.autoRecording ?? false,
+    autoTyping: environmentSettings.autoTyping ?? false,
+    autoRecordType: environmentSettings.autoRecordType ?? false
 }
 try {
     const saved = JSON.parse(fs.readFileSync(settingsPath, 'utf-8'))
     global.prefix = typeof saved.prefix === 'string' ? saved.prefix : defaultSettings.prefix
     global.botMode = saved.mode === 'public' ? 'public' : defaultSettings.mode
+    global.chatbotEnabled = typeof saved.chatbotEnabled === 'boolean' ? saved.chatbotEnabled : defaultSettings.chatbotEnabled
     global.autoViewStatus = typeof saved.autoViewStatus === 'boolean' ? saved.autoViewStatus : defaultSettings.autoViewStatus
     global.autoLikeStatus = typeof saved.autoLikeStatus === 'boolean' ? saved.autoLikeStatus : defaultSettings.autoLikeStatus
     global.autoLikeStatusEmojis = Array.isArray(saved.autoLikeStatusEmojis) && saved.autoLikeStatusEmojis.length
@@ -51,10 +52,6 @@ try {
         : defaultSettings.autoReactEmojis
     global.antiDelete = saved.antiDelete === true
     global.antiDeleteMode = saved.antiDeleteMode === 'chat' ? 'chat' : 'dm'
-    global.antiViewOnceGlobal = saved.antiViewOnceGlobal === true
-    global.antiViewOnceGroups = saved.antiViewOnceGroups && typeof saved.antiViewOnceGroups === 'object'
-        ? saved.antiViewOnceGroups
-        : {}
     global.autoRead = typeof saved.autoRead === 'boolean' ? saved.autoRead : defaultSettings.autoRead
     global.autoRecording = typeof saved.autoRecording === 'boolean' ? saved.autoRecording : defaultSettings.autoRecording
     global.autoTyping = typeof saved.autoTyping === 'boolean' ? saved.autoTyping : defaultSettings.autoTyping
@@ -63,6 +60,7 @@ try {
     Object.assign(global, {
         prefix: defaultSettings.prefix,
         botMode: defaultSettings.mode,
+        chatbotEnabled: defaultSettings.chatbotEnabled,
         autoViewStatus: defaultSettings.autoViewStatus,
         autoLikeStatus: defaultSettings.autoLikeStatus,
         autoLikeStatusEmojis: defaultSettings.autoLikeStatusEmojis,
@@ -70,8 +68,6 @@ try {
         autoReactEmojis: defaultSettings.autoReactEmojis,
         antiDelete: defaultSettings.antiDelete,
         antiDeleteMode: defaultSettings.antiDeleteMode,
-        antiViewOnceGlobal: defaultSettings.antiViewOnceGlobal,
-        antiViewOnceGroups: defaultSettings.antiViewOnceGroups,
         autoRead: defaultSettings.autoRead,
         autoRecording: defaultSettings.autoRecording,
         autoTyping: defaultSettings.autoTyping,

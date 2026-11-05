@@ -83,9 +83,6 @@ let handler = async (m, { EliteProTech, command }) => {
             }
 
             const exported = readExport(file.toString('utf8'))
-            if (exported.source?.fromMe !== true) {
-                return await m.reply('For safety, .try only re-sends messages originally sent by this bot. Use .getmsg on one of your bot’s messages.')
-            }
             if (!exported.payloadObject || typeof exported.payloadObject !== 'object') {
                 return await m.reply('The export does not contain a valid message payload.')
             }

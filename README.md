@@ -48,6 +48,25 @@ DON'T FORGET TO FORK 🍴 & STAR 🌟 OUR REPO🫠
 - Add your session ID to SESSION_ID in the .env or config.js file.
 - Edit the .env file according to your preferences.
 
+Automation defaults can also be set as environment variables on your host. Boolean values accept `true`/`false` (also `1`/`0`, `yes`/`no`, or `on`/`off`). A value saved later by an owner command takes precedence on future restarts.
+
+When enabled, the chatbot answers text messages in DMs and responds in groups only when the bot is mentioned or someone replies to a bot message. Use `.chatbot on` or `.chatbot off` to change it; text from a quoted message is included as context.
+
+```env
+CHATBOT_ENABLED=false
+AUTO_VIEW_STATUS=false
+AUTO_LIKE_STATUS=false
+AUTO_LIKE_STATUS_EMOJIS=💚
+AUTO_REACT=false
+AUTO_REACT_EMOJIS=💚
+AUTO_READ=false
+AUTO_RECORDING=false
+AUTO_TYPING=false
+AUTO_RECORD_TYPE=false
+```
+
+Leave a variable unset to use its built-in default. To return a setting to its environment default after a command has saved it, remove that setting's key from `database/settings.json`.
+
 ---
 
 ## FOR PANEL DEPLOYMENT

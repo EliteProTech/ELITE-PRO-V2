@@ -19,6 +19,36 @@ global.stickerPack = {
     author: 'EliteProTech'
 }
 
+const envBoolean = (name, fallback = false) => {
+    const value = process.env[name]?.trim().toLowerCase()
+    if (value === undefined || value === '') return fallback
+    if (['true', '1', 'yes', 'on'].includes(value)) return true
+    if (['false', '0', 'no', 'off'].includes(value)) return false
+    return fallback
+}
+
+const envEmojis = (name, fallback) => {
+    const emojis = process.env[name]
+        ?.split(',')
+        .map(emoji => emoji.trim())
+        .filter(Boolean)
+        .slice(0, 20)
+    return emojis?.length ? emojis : fallback
+}
+
+global.settingsDefaults = {
+    chatbotEnabled: envBoolean('CHATBOT_ENABLED'),
+    autoViewStatus: envBoolean('AUTO_VIEW_STATUS'),
+    autoLikeStatus: envBoolean('AUTO_LIKE_STATUS'),
+    autoLikeStatusEmojis: envEmojis('AUTO_LIKE_STATUS_EMOJIS', ['💚']),
+    autoReact: envBoolean('AUTO_REACT'),
+    autoReactEmojis: envEmojis('AUTO_REACT_EMOJIS', ['💚']),
+    autoRead: envBoolean('AUTO_READ'),
+    autoRecording: envBoolean('AUTO_RECORDING'),
+    autoTyping: envBoolean('AUTO_TYPING'),
+    autoRecordType: envBoolean('AUTO_RECORD_TYPE')
+}
+
 const file = fileURLToPath(import.meta.url)
 global.session = process.env.SESSION_ID || ''
 fs.watchFile(file, () => {
