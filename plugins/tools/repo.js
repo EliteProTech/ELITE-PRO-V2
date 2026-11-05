@@ -1,25 +1,46 @@
+import fs from 'fs'
+import path from 'path'
+import { fileURLToPath } from 'url'
 import axios from 'axios'
 
 const REPO_URL = 'https://github.com/EliteProTech/ELITE-PRO-V2'
 const REPO_API_URL = 'https://api.github.com/repos/EliteProTech/ELITE-PRO-V2'
 const REPO_PREVIEW_URL = 'https://opengraph.githubassets.com/1/EliteProTech/ELITE-PRO-V2'
+const FALLBACK_IMAGE_PATH = fileURLToPath(new URL('../../lib/elitepropic.jpg', import.meta.url))
+
+async function getRepoPreview() {
+    try {
+        const response = await axios.get(REPO_PREVIEW_URL, {
+            responseType: 'arraybuffer',
+            timeout: 8000,
+            maxContentLength: 8 * 1024 * 1024,
+            maxBodyLength: 8 * 1024 * 1024
+        })
+        const contentType = String(response.headers['content-type'] || '')
+        if (contentType.startsWith('image/')) return Buffer.from(response.data)
+    } catch {}
+
+    return fs.readFileSync(FALLBACK_IMAGE_PATH)
+}
 
 let handler = async (m, { EliteProTech }) => {
-    let stars = null
-    let forks = null
-
-    try {
-        const { data } = await axios.get(REPO_API_URL, {
+    const [statsResult, imageResult] = await Promise.allSettled([
+        axios.get(REPO_API_URL, {
             timeout: 5000,
             headers: {
                 Accept: 'application/vnd.github+json',
                 'User-Agent': 'ELITE-PRO-V2-WhatsApp-Bot'
             }
-        })
+        }),
+        getRepoPreview()
+    ])
 
-        if (Number.isFinite(data?.stargazers_count)) stars = data.stargazers_count
-        if (Number.isFinite(data?.forks_count)) forks = data.forks_count
-    } catch {}
+    const data = statsResult.status === 'fulfilled' ? statsResult.value.data : null
+    const stars = Number.isFinite(data?.stargazers_count) ? data.stargazers_count : null
+    const forks = Number.isFinite(data?.forks_count) ? data.forks_count : null
+    const image = imageResult.status === 'fulfilled'
+        ? imageResult.value
+        : fs.readFileSync(FALLBACK_IMAGE_PATH)
 
     const counts = stars !== null && forks !== null
         ? `⭐ Stars: ${stars.toLocaleString()}\n🍴 Forks: ${forks.toLocaleString()}`
@@ -32,21 +53,7 @@ let handler = async (m, { EliteProTech }) => {
         `*Deploy in 2 mins:* Fork, Star, Deploy, Pair to WhatsApp.\n\n` +
         `*ELITE-PRO-V2 | TEAM*`
 
-    await EliteProTech.sendMessage(m.chat, {
-        text,
-        contextInfo: {
-            externalAdReply: {
-                title: 'ELITE-PRO-V2 Official Repo',
-                body: stars !== null && forks !== null
-                    ? `⭐ ${stars.toLocaleString()} Stars  •  🍴 ${forks.toLocaleString()} Forks`
-                    : 'Fork, star, deploy, and pair to WhatsApp',
-                mediaType: 1,
-                sourceUrl: REPO_URL,
-                thumbnailUrl: REPO_PREVIEW_URL,
-                renderLargerThumbnail: true
-            }
-        }
-    }, { quoted: m })
+    await EliteProTech.sendMessage(m.chat, { image, caption: text }, { quoted: m })
 }
 
 handler.command = ['repo']
