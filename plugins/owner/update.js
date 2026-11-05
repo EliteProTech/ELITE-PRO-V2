@@ -66,6 +66,15 @@ const normalizeChangedFiles = files => files
     .map(file => String(file).replace(/\\/g, '/').trim())
     .filter(Boolean)
 
+const isSessionStatusLine = line => {
+    const file = line.slice(3).replace(/^"|"$/g, '').replace(/\\/g, '/')
+    return file === 'session' || file.startsWith('session/')
+}
+
+const hasStashableChanges = status => status
+    .split(/\r?\n/)
+    .some(line => line.trim() && !isSessionStatusLine(line))
+
 const reloadRuntimeFiles = async files => {
     const changed = normalizeChangedFiles(files)
     const pluginsChanged = changed.some(file => file.startsWith('plugins/'))
@@ -102,7 +111,7 @@ const updateWithGit = async repo => {
     )
 
     let savedLocalChanges = false
-    if (status.trim()) {
+    if (hasStashableChanges(status)) {
         let previousStash = ''
         try {
             const { stdout } = await execFileAsync(
@@ -113,11 +122,23 @@ const updateWithGit = async repo => {
             previousStash = stdout.trim()
         } catch {}
 
-        await execFileAsync(
-            'git',
-            ['-C', projectRoot, 'stash', 'push', '--include-untracked', '-m', `ELITE-PRO-V2 update ${Date.now()}`],
-            { maxBuffer: 1024 * 1024 }
-        )
+        let stashError = null
+        try {
+            await execFileAsync(
+                'git',
+                [
+                    '-C', projectRoot,
+                    'stash', 'push', '--include-untracked',
+                    '-m', `ELITE-PRO-V2 update ${Date.now()}`,
+                    '--', '.', ':(exclude)session', ':(exclude)session/**'
+                ],
+                { maxBuffer: 1024 * 1024 }
+            )
+        } catch (error) {
+            // Git can create the stash successfully but exit non-zero when it
+            // cannot remove an untracked directory that is still being written.
+            stashError = error
+        }
 
         const { stdout: remainingChanges } = await execFileAsync(
             'git',
@@ -135,7 +156,7 @@ const updateWithGit = async repo => {
         } catch {}
 
         savedLocalChanges = Boolean(currentStash && currentStash !== previousStash)
-        if (remainingChanges.trim() || !savedLocalChanges) {
+        if (hasStashableChanges(remainingChanges) || !savedLocalChanges) {
             let restoreNote = ''
             if (savedLocalChanges) {
                 try {
@@ -145,7 +166,8 @@ const updateWithGit = async repo => {
                     restoreNote = ` Local changes remain saved in Git stash: ${error.stderr || error.message || error}`
                 }
             }
-            throw new Error(`Could not safely save all local changes to Git stash. No update was applied.${restoreNote}`)
+            const stashOutput = stashError?.stderr || stashError?.message || ''
+            throw new Error(`Could not safely save all local changes to Git stash. No update was applied.${restoreNote}${stashOutput ? `\n${stashOutput}` : ''}`)
         }
     }
 
