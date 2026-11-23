@@ -55,7 +55,7 @@ async function downloadMedia(EliteProTech, quoted) {
         if (media.length) return media
     }
 
-    throw new Error('The quoted copy has no media download data, and the original is not available in the bot’s message cache. The bot must have received the original while online to recover it.')
+    throw new Error('No media found — not in the quote, and not cached (bot must have been online when it arrived).')
 }
 
 async function sendMedia(EliteProTech, quoted, destination, quotedMessage) {
