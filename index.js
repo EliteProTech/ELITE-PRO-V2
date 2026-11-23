@@ -603,7 +603,7 @@ async function start() {
         const logger = pino({ level: 'silent' })
         const socket = EliteProTech = makeWASocket({
             auth: { creds: state.creds, keys: makeCacheableSignalKeyStore(state.keys, logger) },
-            browser: Browsers.ubuntu('Chrome'),
+            browser: state.creds.registered ? Browsers.android('13') : Browsers.ubuntu('Chrome'),
             logger,
             ...(version ? { version } : {}),
             printQRInTerminal: false,
