@@ -90,7 +90,12 @@ let handler = async (m, { command, EliteProTech }) => {
     }
 
     const isViewOnceCommand = command === 'vv' || command === 'vvdm' || command === 'viewonce'
-    const isViewOnce = Boolean(m.quoted.viewOnce || m.quoted.msg?.viewOnce)
+    const wrapperKeys = ['viewOnceMessage', 'viewOnceMessageV2', 'viewOnceMessageV2Extension']
+    const isViewOnce = Boolean(
+        m.quoted.viewOnce ||
+        m.quoted.msg?.viewOnce ||
+        wrapperKeys.some(key => m.quoted.rawMessage?.[key])
+    )
     if (isViewOnceCommand && (!MEDIA_TYPES.has(m.quoted.mtype) || !isViewOnce)) {
         return await m.reply('Reply to a view-once image, video, audio, document, or sticker.')
     }
