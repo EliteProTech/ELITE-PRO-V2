@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const API_URL = 'https://eliteprotech-apis.zone.id/download/apk'
+const API_URL = 'https://api.eliteprotech.site/download/apk'
 const MAX_APK_BYTES = 150 * 1024 * 1024
 
 const formatSize = bytes => {
