@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const API_URL = 'https://eliteprotech-apis.zone.id/download/tiktok'
+const API_URL = 'https://api.eliteprotech.site/download/tiktok'
 
 const isTikTokUrl = value => {
     try {
