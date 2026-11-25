@@ -535,6 +535,16 @@ const getStatusCode = lastDisconnect => {
     }
 }
 
+function closeSocket(socket) {
+    if (!socket) return
+    try {
+        socket.ev?.removeAllListeners()
+    } catch {}
+    try {
+        socket.ws?.close?.()
+    } catch {}
+}
+
 function disableReconnectForLogout(message = 'Device logged out. Delete the session folder, then pair the bot again.') {
     if (logoutDetected) return
     logoutDetected = true
@@ -546,24 +556,45 @@ function disableReconnectForLogout(message = 'Device logged out. Delete the sess
         clearTimeout(reconnectStabilityTimer)
         reconnectStabilityTimer = null
     }
-    try {
-        EliteProTech?.ev.removeAllListeners()
-        EliteProTech?.ws?.close?.()
-    } catch {}
+    closeSocket(EliteProTech)
     EliteProTech = null
+    isConnecting = false
     console.log(chalk.redBright(`[CONNECTION] ${message}`))
 }
 
-function restartBot(delay = 5000) {
-    if (logoutDetected) return
-    if (reconnectTimer) {
-        clearTimeout(reconnectTimer)
-        reconnectTimer = null
+function getReconnectDelay(statusCode, errorMessage = '') {
+    if (statusCode === DisconnectReason.restartRequired) return 1000
+
+    let base
+
+    if (statusCode === DisconnectReason.connectionClosed) {
+        base = 5000
+    } else if (statusCode === DisconnectReason.unavailableService) {
+        base = 15000
+    } else if (statusCode === DisconnectReason.badSession) {
+        base = 30000
+    } else if (
+        statusCode === DisconnectReason.connectionLost ||
+        statusCode === DisconnectReason.timedOut ||
+        statusCode === 0
+    ) {
+        base = 8000
+    } else {
+        base = errorMessage.includes('Stream Errored') ? 15000 : 5000
     }
+
+    const delay = Math.min(base * 2 ** Math.min(reconnectAttempts, 4), 120000)
+    reconnectAttempts += 1
+    return delay
+}
+
+function restartBot(delay = 5000) {
+    if (logoutDetected || reconnectTimer) return
+
     reconnectTimer = setTimeout(() => {
         reconnectTimer = null
-        if (logoutDetected) return
-        start()
+        if (logoutDetected || isConnecting) return
+        void start()
     }, delay)
 }
 
@@ -576,8 +607,9 @@ async function start() {
         await loadRuntime()
 
         if (EliteProTech) {
-            EliteProTech.ev.removeAllListeners()
-            EliteProTech.ws?.close?.()
+            const previousSocket = EliteProTech
+            EliteProTech = null
+            closeSocket(previousSocket)
         }
 
         const credsPath = path.join(__dirname, 'session', 'creds.json')
@@ -739,26 +771,30 @@ async function start() {
                     disableReconnectForLogout('Session opened on another instance. Reconnect stopped to avoid a takeover loop.')
                     return
                 }
-                let delay = 1000
-                if (statusCode !== DisconnectReason.restartRequired) {
-                    const base = errorMessage.includes('Stream Errored')
-                        ? 15000
-                        : (statusCode === DisconnectReason.connectionLost || statusCode === 0) ? 8000 : 5000
-                    delay = Math.min(base * 2 ** Math.min(reconnectAttempts++, 4), 120000)
-                }
+
+                const delay = getReconnectDelay(statusCode, errorMessage)
                 const reason = errorMessage.replace(/\s+/g, ' ').trim().slice(0, 120)
                 const code = statusCode || 'unknown'
                 const detail = reason ? `: ${reason}` : ''
-                if (statusCode !== DisconnectReason.restartRequired) console.log(chalk.yellow(`[CONNECTION] Disconnected (${code}${detail}). Reconnecting in ${delay / 1000}s.`))
+
+                closeSocket(socket)
+                if (EliteProTech === socket) EliteProTech = null
+
+                if (statusCode !== DisconnectReason.restartRequired) {
+                    console.log(chalk.yellow(`[CONNECTION] Disconnected (${code}${detail}). Reconnecting in ${delay / 1000}s.`))
+                }
+
                 restartBot(delay)
             }
         })
 
     } catch (e) {
+        const failedSocket = EliteProTech
+        EliteProTech = null
+        closeSocket(failedSocket)
         isConnecting = false
-        if (!reconnectTimer) {
-            restartBot(10000)
-        }
+        if (!logoutDetected) restartBot(10000)
+        console.error('[CONNECTION] Startup failed:', e?.message || e)
     }
 }
 
