@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const API_URL = 'https://eliteprotech-apis.zone.id/ai/deepseekai'
+const API_URL = 'https://api.eliteprotech.site/ai/deepseekai'
 
 const apiError = (data, fallback) => {
     if (typeof data === 'string' && data.trim()) return data.trim()

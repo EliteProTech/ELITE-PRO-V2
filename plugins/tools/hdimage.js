@@ -2,7 +2,7 @@ import axios from 'axios'
 import fs from 'node:fs'
 import { uploadToEliteTempUrl } from '../../lib/uploader.js'
 
-const API_URL = 'https://eliteprotech-apis.zone.id/image/jpghd'
+const API_URL = 'https://api.eliteprotech.site/image/jpghd'
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024
 
 function getApiError(data, status) {

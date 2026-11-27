@@ -2,22 +2,19 @@ import fs from 'fs'
 import { ImgBB, uploadToEliteProTechUrl, uploadToEliteTempUrl } from '../../lib/uploader.js'
 
 const uploaders = {
+    url: uploadToEliteProTechUrl,
+    tourl: uploadToEliteProTechUrl,
     'eliteprotech-url': uploadToEliteProTechUrl,
-    imgbb: ImgBB,
-    tempurl: uploadToEliteTempUrl
+    tempurl: uploadToEliteTempUrl,
+    imgbb: ImgBB
 }
 
-let handler = async (m, { args }) => {
-    const service = args[0]?.toLowerCase()
-    const upload = uploaders[service]
-
-    if (!upload) {
-        return await m.reply(`Usage: ${global.prefix || ''}url eliteprotech-url | imgbb | tempurl\nReply to an image, video, audio, document, or sticker.`)
-    }
+let handler = async (m, { command }) => {
+    const upload = uploaders[String(command || '').toLowerCase()]
 
     const target = m.quoted || (m.mtype === 'imageMessage' || m.mtype === 'videoMessage' || m.mtype === 'audioMessage' || m.mtype === 'documentMessage' || m.mtype === 'stickerMessage' ? m : null)
     if (!target) {
-        return await m.reply('Reply to a supported media message first.')
+        return await m.reply(`Reply to supported media with ${global.prefix || '.'}url, ${global.prefix || '.'}tempurl, or ${global.prefix || '.'}imgbb.`)
     }
 
     let file
@@ -34,6 +31,6 @@ let handler = async (m, { args }) => {
     }
 }
 
-handler.command = ['url', 'tourl']
+handler.command = ['url', 'tourl', 'eliteprotech-url', 'tempurl', 'imgbb']
 
 export default handler
