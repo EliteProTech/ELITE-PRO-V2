@@ -102,12 +102,9 @@ let handler = async (m, { text = '', command, EliteProTech }) => {
             `Channel: ${video.author?.name || 'Unknown'}`,
             `Duration: ${duration}`,
             `Views: ${Number(video.views || 0).toLocaleString()}`,
-            result.quality ? `Quality: ${result.quality}` : '',
-            result.size ? `Size: ${result.size}` : '',
-            watchUrl,
-            'Downloading video...'
-        ].filter(Boolean).join('\n')
-        const infoCard = `*${title || 'YouTube video'}*\n\n${details}`
+            watchUrl
+        ].join('\n')
+        const infoCard = `*${title || 'YouTube video'}*\n\n${details}\n\nDownloading video...`
 
         try {
             if (thumbnail) {
