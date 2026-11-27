@@ -1,5 +1,6 @@
 import { getGroupMetadata } from '../../lib/myfunc.js'
 import { runGroupActions } from '../../lib/groupactions.js'
+import { requestReplyConfirmation } from '../../lib/confirmations.js'
 
 async function targetsFromMessage(EliteProTech, m, args) {
     const metadata = await getGroupMetadata(EliteProTech, m.chat, true)
@@ -138,7 +139,7 @@ async function replySuccess(m, EliteProTech, action, targets, resolvedMentions) 
     )
 }
 
-let handler = async (m, { EliteProTech, args, command }) => {
+let handler = async (m, { EliteProTech, args, command, confirmed = false }) => {
     const targets = await targetsFromMessage(EliteProTech, m, args)
 
     if (!targets.length) {
@@ -162,13 +163,12 @@ let handler = async (m, { EliteProTech, args, command }) => {
 
     const requiresConfirmation = (command === 'add' && targets.length > 5) ||
         (['kick', 'promote', 'demote'].includes(command) && targets.length > 10)
-    const confirmed = args.some(arg => String(arg).toLowerCase() === 'confirm')
     if (requiresConfirmation && !confirmed) {
-        return await m.reply(
-            `This will ${action} *${targets.length}* members one at a time with a safety delay.\n\n` +
-            `Add *confirm* at the end to continue, for example:\n` +
-            `${global.prefix || ''}${command} 2348000000000,2348111111111 confirm`
-        )
+        return await requestReplyConfirmation(EliteProTech, m, {
+            text: `This will ${action} *${targets.length}* members one at a time with a safety delay.\n\nReply to this message with *confirm* within 60 seconds to continue.`,
+            requirements: { group: true, admin: true, isBotAdmin: true },
+            execute: () => handler(m, { EliteProTech, args, command, confirmed: true })
+        })
     }
 
     const mentions = await getMentionTargets(

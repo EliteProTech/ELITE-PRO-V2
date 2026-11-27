@@ -1,4 +1,5 @@
 import { runGroupActions } from '../../lib/groupactions.js'
+import { requestReplyConfirmation } from '../../lib/confirmations.js'
 
 function pendingJid(entry) {
     if (typeof entry === 'string') return entry
@@ -32,7 +33,7 @@ function selectedRequests(m, args, pending) {
     return pending.filter(pendingJid => requested.some(target => sameUser(target, pendingJid)))
 }
 
-let handler = async (m, { EliteProTech, command, args }) => {
+let handler = async (m, { EliteProTech, command, args, confirmed = false }) => {
     if (command === 'joinapproval') {
         const mode = args[0]?.toLowerCase()
         if (!['on', 'off'].includes(mode)) {
@@ -66,11 +67,12 @@ let handler = async (m, { EliteProTech, command, args }) => {
     }
 
     const action = command === 'approve' ? 'approve' : 'reject'
-    if (args[0]?.toLowerCase() === 'all' && !args.some(arg => String(arg).toLowerCase() === 'confirm')) {
-        return await m.reply(
-            `This will ${action} *${targets.length}* pending requests one at a time with a safety delay.\n\n` +
-            `Run *${global.prefix || ''}${command} all confirm* to continue.`
-        )
+    if (args[0]?.toLowerCase() === 'all' && !confirmed) {
+        return await requestReplyConfirmation(EliteProTech, m, {
+            text: `This will ${action} *${targets.length}* pending requests one at a time with a safety delay.\n\nReply to this message with *confirm* within 60 seconds to continue.`,
+            requirements: { group: true, admin: true, isBotAdmin: true },
+            execute: () => handler(m, { EliteProTech, command, args, confirmed: true })
+        })
     }
     await m.reply(`${action === 'approve' ? 'Approving' : 'Rejecting'} ${targets.length} request${targets.length === 1 ? '' : 's'} safely…`)
 

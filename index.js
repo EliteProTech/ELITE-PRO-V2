@@ -793,8 +793,9 @@ async function start() {
         EliteProTech = null
         closeSocket(failedSocket)
         isConnecting = false
-        if (!logoutDetected) restartBot(10000)
-        console.error('[CONNECTION] Startup failed:', e?.message || e)
+        const retryDelay = getReconnectDelay(0, e?.message || '')
+        if (!logoutDetected) restartBot(retryDelay)
+        console.error(`[CONNECTION] Startup failed; retrying in ${retryDelay / 1000}s:`, e?.message || e)
     }
 }
 
@@ -865,12 +866,19 @@ const shutdown = async () => {
     process.exit(0)
 }
 
-process.on('unhandledRejection', error => console.error('[UNHANDLED]', error))
-process.on('uncaughtException', error => console.error('[UNCAUGHT]', error))
+process.on('unhandledRejection', error => {
+    console.error('[UNHANDLED] Fatal promise rejection:', error)
+    process.exit(1)
+})
+process.on('uncaughtException', error => {
+    console.error('[UNCAUGHT] Fatal exception:', error)
+    process.exit(1)
+})
 process.on('SIGINT', shutdown)
 process.on('SIGTERM', shutdown)
 
 let supervisorDelay = 500
+const SUPERVISOR_STABLE_MS = 5 * 60 * 1000
 
 function startSupervisor() {
     if (supervisorStopping) return
@@ -887,7 +895,7 @@ function startSupervisor() {
     supervisorWorker.on('exit', () => {
         supervisorWorker = null
         if (supervisorStopping) return
-        supervisorDelay = Date.now() - startedAt > 30000 ? 500 : Math.min(supervisorDelay * 2, 60000)
+        supervisorDelay = Date.now() - startedAt > SUPERVISOR_STABLE_MS ? 500 : Math.min(supervisorDelay * 2, 60000)
         setTimeout(startSupervisor, supervisorDelay)
     })
 }

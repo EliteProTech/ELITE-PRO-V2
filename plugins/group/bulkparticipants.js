@@ -1,5 +1,6 @@
 import { getGroupMetadata } from '../../lib/myfunc.js'
 import { runGroupActions } from '../../lib/groupactions.js'
+import { requestReplyConfirmation } from '../../lib/confirmations.js'
 
 function participantJid(participant) {
     return participant?.phoneNumber || participant?.id || participant?.lid || null
@@ -24,7 +25,7 @@ function selectTargets(command, participants, botJid) {
         .filter(Boolean)
 }
 
-let handler = async (m, { EliteProTech, command, args }) => {
+let handler = async (m, { EliteProTech, command, confirmed = false }) => {
     const metadata = await getGroupMetadata(EliteProTech, m.chat, true)
     const botJid = EliteProTech.decodeJid(EliteProTech.user.id)
     const targets = selectTargets(command, metadata?.participants || [], botJid)
@@ -40,14 +41,15 @@ let handler = async (m, { EliteProTech, command, args }) => {
     }
     const [action, pastTense] = labels[command]
 
-    if (args[0]?.toLowerCase() !== 'confirm') {
+    if (!confirmed) {
         const protectedMembers = command === 'kickall'
             ? 'Admins and the bot are protected.'
             : 'The bot and group creator are protected.'
-        return await m.reply(
-            `This will ${action} *${targets.length}* member${targets.length === 1 ? '' : 's'}, one at a time with a safety delay. ${protectedMembers}\n\n` +
-            `Run *${global.prefix || ''}${command} confirm* to continue.`
-        )
+        return await requestReplyConfirmation(EliteProTech, m, {
+            text: `This will ${action} *${targets.length}* member${targets.length === 1 ? '' : 's'}, one at a time with a safety delay. ${protectedMembers}\n\nReply to this message with *confirm* within 60 seconds to continue.`,
+            requirements: { group: true, admin: true, isBotAdmin: true },
+            execute: () => handler(m, { EliteProTech, command, confirmed: true })
+        })
     }
 
     await m.reply(`Starting bulk ${action}. Processing ${targets.length} member${targets.length === 1 ? '' : 's'} safely…`)
