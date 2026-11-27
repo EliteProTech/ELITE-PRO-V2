@@ -1,9 +1,37 @@
 import axios from 'axios'
 import dns from 'dns/promises'
 import net from 'net'
+import { fileTypeFromBuffer } from 'file-type'
 
 const MAX_REDIRECTS = 3
 const MAX_RESPONSE_BYTES = 25 * 1024 * 1024
+const MIME_BY_EXTENSION = {
+    jpg: 'image/jpeg',
+    jpeg: 'image/jpeg',
+    png: 'image/png',
+    gif: 'image/gif',
+    webp: 'image/webp',
+    bmp: 'image/bmp',
+    tif: 'image/tiff',
+    tiff: 'image/tiff',
+    mp4: 'video/mp4',
+    m4v: 'video/mp4',
+    webm: 'video/webm',
+    mov: 'video/quicktime',
+    mp3: 'audio/mpeg',
+    m4a: 'audio/mp4',
+    aac: 'audio/aac',
+    ogg: 'audio/ogg',
+    opus: 'audio/ogg',
+    wav: 'audio/wav',
+    pdf: 'application/pdf',
+    json: 'application/json',
+    txt: 'text/plain',
+    html: 'text/html',
+    xml: 'application/xml',
+    csv: 'text/csv',
+    zip: 'application/zip'
+}
 
 const isPrivateAddress = address => {
     if (net.isIPv4(address)) {
@@ -94,53 +122,67 @@ const fileNameFromUrl = value => {
     }
 }
 
+const mimeFromFileName = value => {
+    const extension = String(value).split('.').pop()?.toLowerCase()
+    return MIME_BY_EXTENSION[extension] || ''
+}
+
 let handler = async (m, { text, EliteProTech }) => {
     const input = text?.trim()
     if (!input) return await m.reply(`Usage: ${global.prefix || ''}fetch https://example.com/api`)
 
     try {
         const result = await fetchUrl(input)
-        const fileName = fileNameFromUrl(result.url)
+        let fileName = fileNameFromUrl(result.url)
+        const contentType = result.contentType.split(';')[0].trim()
+        const detectedType = await fileTypeFromBuffer(result.body)
+        const extensionMime = mimeFromFileName(fileName)
+        const mimeType = detectedType?.mime ||
+            (contentType && contentType !== 'application/octet-stream' ? contentType : '') ||
+            extensionMime || contentType || 'application/octet-stream'
+        if (detectedType?.ext && !/\.[a-z0-9]{1,10}$/i.test(fileName)) {
+            fileName = `${fileName || 'fetch-response'}.${detectedType.ext}`
+        }
 
-        if (result.contentType.startsWith('image/')) {
+        if (mimeType.startsWith('image/')) {
             return await EliteProTech.sendMessage(m.chat, {
                 image: result.body,
-                mimetype: result.contentType
+                mimetype: mimeType
             }, { quoted: m })
         }
 
-        if (result.contentType.startsWith('video/')) {
+        if (mimeType.startsWith('video/')) {
             return await EliteProTech.sendMessage(m.chat, {
                 video: result.body,
-                mimetype: result.contentType,
+                mimetype: mimeType,
                 fileName
             }, { quoted: m })
         }
 
-        if (result.contentType.startsWith('audio/')) {
+        if (mimeType.startsWith('audio/')) {
             return await EliteProTech.sendMessage(m.chat, {
                 audio: result.body,
-                mimetype: result.contentType,
+                mimetype: mimeType,
                 fileName
             }, { quoted: m })
         }
 
-        const isText = result.contentType.includes('text/') ||
-            result.contentType.includes('json') ||
-            result.contentType.includes('xml') ||
-            result.contentType.includes('javascript')
+        const isText = mimeType.includes('text/') ||
+            mimeType.includes('json') ||
+            mimeType.includes('xml') ||
+            mimeType.includes('javascript')
 
         if (!isText) {
             return await EliteProTech.sendMessage(m.chat, {
                 document: result.body,
-                mimetype: result.contentType || 'application/octet-stream',
+                mimetype: mimeType || 'application/octet-stream',
                 fileName
             }, { quoted: m })
         }
 
         let output = result.body.toString('utf8')
 
-        if (result.contentType.includes('json')) {
+        if (mimeType.includes('json')) {
             try { output = JSON.stringify(JSON.parse(output), null, 2) } catch {}
         }
 
@@ -149,7 +191,7 @@ let handler = async (m, { text, EliteProTech }) => {
         } else {
             await EliteProTech.sendMessage(m.chat, {
                 document: Buffer.from(output),
-                mimetype: result.contentType.includes('json') ? 'application/json' : 'text/plain',
+                mimetype: mimeType.includes('json') ? 'application/json' : 'text/plain',
                 fileName: fileName.includes('.') ? fileName : 'fetch-response.txt'
             }, { quoted: m })
         }
