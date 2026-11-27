@@ -94,6 +94,34 @@ let handler = async (m, { text = '', command, EliteProTech }) => {
         }
 
         const title = String(result.title || video.title || '').trim().slice(0, 1000)
+        const thumbnail = result.thumbnail || video.thumbnail
+        const duration = typeof result.duration === 'number'
+            ? video.timestamp || `${result.duration}s`
+            : result.duration || video.timestamp || 'Unknown'
+        const details = [
+            `Channel: ${video.author?.name || 'Unknown'}`,
+            `Duration: ${duration}`,
+            `Views: ${Number(video.views || 0).toLocaleString()}`,
+            result.quality ? `Quality: ${result.quality}` : '',
+            result.size ? `Size: ${result.size}` : '',
+            watchUrl,
+            'Downloading video...'
+        ].filter(Boolean).join('\n')
+        const infoCard = `*${title || 'YouTube video'}*\n\n${details}`
+
+        try {
+            if (thumbnail) {
+                await EliteProTech.sendMessage(m.chat, {
+                    image: { url: thumbnail },
+                    caption: infoCard
+                }, { quoted: m })
+            } else {
+                await m.reply(infoCard)
+            }
+        } catch {
+            await m.reply(infoCard)
+        }
+
         return await EliteProTech.sendMessage(m.chat, {
             video: { url: result.download_url },
             mimetype: 'video/mp4',
