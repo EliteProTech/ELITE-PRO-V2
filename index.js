@@ -612,7 +612,8 @@ async function start() {
             closeSocket(previousSocket)
         }
 
-        const credsPath = path.join(__dirname, 'session', 'creds.json')
+        const sessionPath = path.join(__dirname, 'session')
+        const credsPath = path.join(sessionPath, 'creds.json')
         if ((!fs.existsSync(credsPath) || fs.statSync(credsPath).size === 0) && global.session) {
             try {
                 const sessionData = parseSessionData(global.session)
@@ -624,7 +625,7 @@ async function start() {
             }
         }
 
-        const { state, saveCreds } = await useMultiFileAuthState('./session')
+        const { state, saveCreds } = await useMultiFileAuthState(sessionPath)
         let version
         try {
             const latest = await fetchLatestBaileysVersion()
